@@ -8,7 +8,7 @@ A ride-pooling MVP for Dhaka's battery-powered "Tesla" three-wheelers. Built aro
 
 ## 📺 Demo Video
 
-> 🎬 [Watch 6-minute demo video](#) ← _Link after recording_
+> 🎬 [Watch 6-minute demo video](https://youtu.be/gHmvgXgvSWs) 
 
 ---
 
