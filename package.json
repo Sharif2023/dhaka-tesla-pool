@@ -6,9 +6,12 @@
     "frontend"
   ],
   "scripts": {
+    "build": "npm --prefix frontend run build",
+    "start": "npm --prefix frontend run start",
     "dev:backend": "npm --prefix backend run dev",
     "dev:frontend": "npm --prefix frontend run dev",
-    "build:backend": "npm --prefix backend run build"
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build"
   },
   "dependencies": {
     "@neon/config": "^1.8.3",
