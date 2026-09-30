@@ -229,6 +229,63 @@ describe('Seat Capacity Enforcement (Bullet has 3 seats)', () => {
       expect(pool.seatsOccupied).toBeLessThanOrEqual(pool.tesla.capacity);
     }
   });
+
+  it('Two concurrent requests cannot corrupt pool capacity when 1 seat is left (The Shirin Problem)', async () => {
+    const [p1, p2] = await Promise.all([
+      prisma.user.create({
+        data: {
+          name: 'Concurrent Rider 1',
+          phone: '+8801511111111',
+          passwordHash: await bcrypt.hash('Tesla@2024', 10),
+          role: 'PASSENGER',
+        },
+      }),
+      prisma.user.create({
+        data: {
+          name: 'Concurrent Rider 2',
+          phone: '+8801522222222',
+          passwordHash: await bcrypt.hash('Tesla@2024', 10),
+          role: 'PASSENGER',
+        },
+      }),
+    ]);
+
+    await Promise.all([
+      prisma.wallet.create({ data: { userId: p1.id, balancePaisa: 50000 } }),
+      prisma.wallet.create({ data: { userId: p2.id, balancePaisa: 50000 } }),
+    ]);
+
+    const [t1Res, t2Res] = await Promise.all([
+      request(app).post('/api/auth/login').send({ phone: '+8801511111111', password: 'Tesla@2024' }),
+      request(app).post('/api/auth/login').send({ phone: '+8801522222222', password: 'Tesla@2024' }),
+    ]);
+
+    const token1 = t1Res.body.data.token;
+    const token2 = t2Res.body.data.token;
+
+    // Fire both ride requests concurrently
+    const [res1, res2] = await Promise.all([
+      request(app)
+        .post('/api/rides')
+        .set('Authorization', `Bearer ${token1}`)
+        .send({ pickupLocationId: bananiId, destLocationId: mohakhaliId, seatsRequested: 1, paymentMethod: 'CASH' }),
+      request(app)
+        .post('/api/rides')
+        .set('Authorization', `Bearer ${token2}`)
+        .send({ pickupLocationId: bananiId, destLocationId: mohakhaliId, seatsRequested: 1, paymentMethod: 'CASH' }),
+    ]);
+
+    expect([200, 201]).toContain(res1.status);
+    expect([200, 201]).toContain(res2.status);
+
+    // Capacity must never be breached on any pool
+    const allPools = await prisma.pool.findMany({
+      include: { tesla: true },
+    });
+    for (const pool of allPools) {
+      expect(pool.seatsOccupied).toBeLessThanOrEqual(pool.tesla.capacity);
+    }
+  });
 });
 
 describe('Driver Flow - Jashim and Bullet', () => {
