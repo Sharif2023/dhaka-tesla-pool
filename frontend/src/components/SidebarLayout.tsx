@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
-import toast from 'react-hot-toast';
 import { Car, Home, MapPin, History, Wallet, LogOut, Zap, User } from 'lucide-react';
 
 interface NavItem {
