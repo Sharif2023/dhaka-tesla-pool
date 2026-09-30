@@ -16,7 +16,7 @@ export const config = {
 
   rateLimit: {
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: parseInt(process.env.RATE_LIMIT_MAX || '100', 10),
+    max: parseInt(process.env.RATE_LIMIT_MAX || '1000', 10),
   },
 
   cors: {

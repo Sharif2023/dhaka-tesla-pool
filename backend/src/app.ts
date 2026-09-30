@@ -21,6 +21,9 @@ import userRoutes from './routes/users';
 
 const app = express();
 
+// ─── Trust reverse proxy (Render, AWS ALB, Cloudflare, etc.) ───
+app.set('trust proxy', 1);
+
 // ─── Security middleware ───
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
@@ -57,6 +60,7 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: 'Too many requests, please try again later.' },
+  skip: (req) => req.method === 'OPTIONS',
 });
 app.use('/api', limiter);
 
