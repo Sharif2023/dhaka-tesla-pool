@@ -2,17 +2,17 @@
 @import "tailwindcss";
 
 :root {
-  --color-bg: #0a0f1e;
-  --color-surface: #111827;
-  --color-surface2: #1a2236;
-  --color-border: #1f2d4a;
-  --color-accent: #3b82f6;
-  --color-accent-hover: #2563eb;
+  --color-bg: #000000;
+  --color-surface: #101010;
+  --color-surface2: #181818;
+  --color-border: #262626;
+  --color-accent: #ffffff;
+  --color-accent-hover: #e5e5e5;
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
-  --color-text: #f1f5f9;
-  --color-muted: #64748b;
+  --color-text: #ededed;
+  --color-muted: #a3a3a3;
 }
 
 * {
@@ -42,22 +42,23 @@ body {
 
 /* ─── Glass card ─── */
 .glass {
-  background: rgba(17, 24, 39, 0.8);
-  backdrop-filter: blur(12px);
+  background: rgba(18, 18, 18, 0.85);
+  backdrop-filter: blur(16px);
   border: 1px solid var(--color-border);
   border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .glass-sm {
-  background: rgba(26, 34, 54, 0.6);
-  backdrop-filter: blur(8px);
+  background: rgba(24, 24, 24, 0.75);
+  backdrop-filter: blur(12px);
   border: 1px solid var(--color-border);
   border-radius: 12px;
 }
 
 /* ─── Gradient text ─── */
 .gradient-text {
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
+  background: linear-gradient(135deg, #ffffff, #a3a3a3, #525252);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -86,15 +87,15 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: white;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  background: var(--color-accent);
+  color: var(--color-bg);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: var(--color-accent-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
 }
 
 .btn-success {
@@ -119,12 +120,13 @@ body {
 
 .btn-outline {
   background: transparent;
-  color: var(--color-accent);
-  border: 1px solid var(--color-accent);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
 }
 
 .btn-outline:hover:not(:disabled) {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--color-text);
 }
 
 .btn-ghost {
@@ -156,7 +158,7 @@ body {
 
 .input:focus {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
 }
 
 .input::placeholder { color: var(--color-muted); }
@@ -173,7 +175,7 @@ body {
   outline: none;
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a3a3a3' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 16px center;
   padding-right: 40px;
@@ -181,7 +183,7 @@ body {
 
 .select:focus {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
 }
 
 .label {
@@ -210,14 +212,14 @@ body {
 }
 
 .badge-requested { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
-.badge-matched   { background: rgba(59, 130, 246, 0.15);  color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
-.badge-arrived   { background: rgba(139, 92, 246, 0.15);  color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.3); }
-.badge-started   { background: rgba(6, 182, 212, 0.15);   color: #06b6d4; border: 1px solid rgba(6, 182, 212, 0.3); }
+.badge-matched   { background: rgba(255, 255, 255, 0.1);  color: #ededed; border: 1px solid rgba(255, 255, 255, 0.2); }
+.badge-arrived   { background: rgba(163, 163, 163, 0.15);  color: #a3a3a3; border: 1px solid rgba(163, 163, 163, 0.3); }
+.badge-started   { background: rgba(255, 255, 255, 0.12); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); }
 .badge-completed { background: rgba(16, 185, 129, 0.15);  color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
 .badge-cancelled { background: rgba(239, 68, 68, 0.15);   color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
 .badge-online    { background: rgba(16, 185, 129, 0.15);  color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
-.badge-offline   { background: rgba(100, 116, 139, 0.15); color: #64748b; border: 1px solid rgba(100, 116, 139, 0.3); }
-.badge-on-trip   { background: rgba(6, 182, 212, 0.15);   color: #06b6d4; border: 1px solid rgba(6, 182, 212, 0.3); }
+.badge-offline   { background: rgba(163, 163, 163, 0.15); color: #a3a3a3; border: 1px solid rgba(163, 163, 163, 0.3); }
+.badge-on-trip   { background: rgba(255, 255, 255, 0.12); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); }
 
 /* ─── Card ─── */
 .card {
@@ -228,7 +230,7 @@ body {
   transition: border-color 0.2s;
 }
 
-.card:hover { border-color: rgba(59, 130, 246, 0.3); }
+.card:hover { border-color: rgba(255, 255, 255, 0.2); }
 .card-sm { padding: 16px; border-radius: 12px; }
 
 /* ─── Animations ─── */
@@ -238,8 +240,8 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-  50%       { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1); }
+  50%       { box-shadow: 0 0 0 8px rgba(255, 255, 255, 0); }
 }
 
 @keyframes spin {
@@ -299,7 +301,7 @@ body {
 }
 
 .nav-item:hover { color: var(--color-text); background: rgba(255,255,255,0.05); }
-.nav-item.active { color: var(--color-accent); border-left-color: var(--color-accent); background: rgba(59, 130, 246, 0.08); }
+.nav-item.active { color: var(--color-text); border-left-color: var(--color-accent); background: rgba(255, 255, 255, 0.08); }
 
 /* ─── Stats ─── */
 .stat-card {

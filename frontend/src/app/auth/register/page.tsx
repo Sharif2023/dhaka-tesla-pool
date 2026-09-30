@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import { UserPlus, User, Car, Zap } from 'lucide-react';
 import { ApiError } from '@/lib/api';
 
 export default function RegisterPage() {
@@ -17,7 +18,7 @@ export default function RegisterPage() {
     try {
       await register({ ...form, email: form.email || undefined });
       const user = useAuthStore.getState().user;
-      toast.success(`Welcome to Dhaka Tesla Pool, ${user?.name}! 🎉`);
+      toast.success(`Welcome to Dhaka Tesla Pool, ${user?.name}!`);
       router.push(form.role === 'DRIVER' ? '/driver' : '/passenger');
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Registration failed';
@@ -30,7 +31,7 @@ export default function RegisterPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0a0f1e 0%, #111827 100%)',
+      background: 'var(--color-bg)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -38,9 +39,11 @@ export default function RegisterPage() {
     }}>
       <div style={{ width: '100%', maxWidth: '440px' }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <span style={{ fontSize: '40px' }}>⚡</span>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+            <Zap size={40} color="var(--color-text)" />
+          </div>
           <h1 style={{ fontSize: '28px', fontWeight: 800, marginTop: '12px', marginBottom: '8px' }}>Join the Pool</h1>
-          <p style={{ color: '#64748b', fontSize: '14px' }}>Create your Dhaka Tesla Pool account</p>
+          <p style={{ color: 'var(--color-muted)', fontSize: '14px' }}>Create your Dhaka Tesla Pool account</p>
         </div>
 
         <div className="glass" style={{ padding: '32px' }}>
@@ -49,8 +52,8 @@ export default function RegisterPage() {
               <label className="label">I am a...</label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 {[
-                  { value: 'PASSENGER', label: '🧑 Passenger', desc: 'Book rides' },
-                  { value: 'DRIVER', label: '🚗 Driver', desc: 'Drive a Tesla' },
+                  { value: 'PASSENGER', icon: <User size={16}/>, label: 'Passenger', desc: 'Book rides' },
+                  { value: 'DRIVER', icon: <Car size={16}/>, label: 'Driver', desc: 'Drive a Tesla' },
                 ].map((r) => (
                   <button
                     key={r.value}
@@ -58,16 +61,18 @@ export default function RegisterPage() {
                     onClick={() => update('role', r.value)}
                     style={{
                       padding: '14px',
-                      border: `2px solid ${form.role === r.value ? '#3b82f6' : '#1f2d4a'}`,
+                      border: `2px solid ${form.role === r.value ? 'var(--color-text)' : 'var(--color-border)'}`,
                       borderRadius: '10px',
-                      background: form.role === r.value ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-                      color: form.role === r.value ? '#3b82f6' : '#64748b',
+                      background: form.role === r.value ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
+                      color: form.role === r.value ? 'var(--color-text)' : 'var(--color-muted)',
                       cursor: 'pointer',
                       textAlign: 'center',
                       transition: 'all 0.2s',
                     }}
                   >
-                    <div style={{ fontWeight: 700, fontSize: '15px' }}>{r.label}</div>
+                    <div style={{ fontWeight: 700, fontSize: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                      {r.icon} {r.label}
+                    </div>
                     <div style={{ fontSize: '12px', marginTop: '2px' }}>{r.desc}</div>
                   </button>
                 ))}
@@ -110,9 +115,9 @@ export default function RegisterPage() {
           </form>
         </div>
 
-        <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '14px', color: '#64748b' }}>
+        <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '14px', color: 'var(--color-muted)' }}>
           Already have an account?{' '}
-          <Link href="/auth/login" style={{ color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}>
+          <Link href="/auth/login" style={{ color: 'var(--color-text)', textDecoration: 'none', fontWeight: 600 }}>
             Sign in
           </Link>
         </p>
