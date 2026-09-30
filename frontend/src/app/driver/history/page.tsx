@@ -30,10 +30,38 @@ export default function DriverHistoryPage() {
 
   return (
     <SidebarLayout navItems={navItems} role="DRIVER">
-      <div style={{ maxWidth: '800px' }}>
-        <div style={{ marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '28px', fontWeight: 800 }}>Trip History</h1>
-          <p style={{ color: 'var(--color-muted)', marginTop: '4px' }}>{pools.length} completed trips</p>
+      <div style={{ maxWidth: '880px', width: '100%' }}>
+        {/* Header */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '28px',
+          paddingBottom: '20px',
+          borderBottom: '1px solid var(--color-border)',
+          flexWrap: 'wrap',
+          gap: '16px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{
+              width: '44px', height: '44px',
+              borderRadius: '12px',
+              background: 'var(--color-surface2)',
+              border: '1px solid var(--color-border)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <History size={22} color="var(--color-text)" />
+            </div>
+            <div>
+              <h1 style={{ fontSize: '26px', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
+                Trip History
+              </h1>
+              <p style={{ color: 'var(--color-muted)', fontSize: '13px', marginTop: '3px', margin: 0 }}>
+                {pools.length} completed trips • Banani Zone
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Stats */}
