@@ -7,17 +7,20 @@ import SidebarLayout from '@/components/SidebarLayout';
 import Link from 'next/link';
 import { rideApi, RideRequest } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { MapPin, Clock, Zap, ArrowRight, Car } from 'lucide-react';
+import { MapPin, Clock, Zap, ArrowRight, Car, Home, CheckCircle, XCircle, Loader, Handshake, Navigation, Sparkles } from 'lucide-react';
 
 const STATUS_COLORS: Record<string, string> = {
-  REQUESTED: '#f59e0b', MATCHED: '#3b82f6', DRIVER_ARRIVED: '#8b5cf6',
-  STARTED: '#06b6d4', COMPLETED: '#10b981', CANCELLED: '#ef4444',
+  REQUESTED: 'var(--color-warning)', MATCHED: 'var(--color-text)', DRIVER_ARRIVED: 'var(--color-muted)',
+  STARTED: 'var(--color-text)', COMPLETED: 'var(--color-success)', CANCELLED: 'var(--color-danger)',
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  REQUESTED: '⏳ Waiting for driver', MATCHED: '🤝 Driver accepted',
-  DRIVER_ARRIVED: '📍 Driver arrived', STARTED: '🚗 On the way',
-  COMPLETED: '✅ Completed', CANCELLED: '❌ Cancelled',
+const STATUS_LABELS: Record<string, React.ReactNode> = {
+  REQUESTED: <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Loader size={14} className="animate-spin" /> Waiting for driver</span>,
+  MATCHED: <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Handshake size={14} /> Driver accepted</span>,
+  DRIVER_ARRIVED: <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MapPin size={14} /> Driver arrived</span>,
+  STARTED: <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Navigation size={14} /> On the way</span>,
+  COMPLETED: <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><CheckCircle size={14} /> Completed</span>,
+  CANCELLED: <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><XCircle size={14} /> Cancelled</span>,
 };
 
 function RideCard({ ride, onCancel }: { ride: RideRequest; onCancel: (id: string) => void }) {
@@ -48,55 +51,57 @@ function RideCard({ ride, onCancel }: { ride: RideRequest; onCancel: (id: string
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '24px', fontWeight: 800, color: '#10b981' }}>৳{totalBDT}</div>
+          <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--color-success)' }}>৳{totalBDT}</div>
           {isPooled && (
-            <span className="badge badge-matched" style={{ fontSize: '10px' }}>Pooled ride</span>
+            <span className="badge" style={{ fontSize: '10px', display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'var(--color-surface2)', border: '1px solid var(--color-border)', color: 'var(--color-muted)' }}>
+              <Sparkles size={10} /> Pooled ride
+            </span>
           )}
         </div>
       </div>
 
       {/* Route */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-        <div style={{ flex: 1, background: '#1a2236', borderRadius: '10px', padding: '12px' }}>
+        <div style={{ flex: 1, background: 'var(--color-surface2)', borderRadius: '10px', padding: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} />
-            <span style={{ fontSize: '12px', color: '#64748b' }}>PICKUP</span>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-success)' }} />
+            <span style={{ fontSize: '12px', color: 'var(--color-muted)' }}>PICKUP</span>
           </div>
           <div style={{ fontWeight: 600, fontSize: '15px' }}>{ride.pickupLocation.name}</div>
-          <div style={{ fontSize: '12px', color: '#64748b' }}>{ride.pickupLocation.zone} zone</div>
+          <div style={{ fontSize: '12px', color: 'var(--color-muted)' }}>{ride.pickupLocation.zone} zone</div>
         </div>
-        <ArrowRight size={16} color="#64748b" />
-        <div style={{ flex: 1, background: '#1a2236', borderRadius: '10px', padding: '12px' }}>
+        <ArrowRight size={16} color="var(--color-muted)" />
+        <div style={{ flex: 1, background: 'var(--color-surface2)', borderRadius: '10px', padding: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-            <MapPin size={8} color="#ef4444" />
-            <span style={{ fontSize: '12px', color: '#64748b' }}>DROP-OFF</span>
+            <MapPin size={8} color="var(--color-danger)" />
+            <span style={{ fontSize: '12px', color: 'var(--color-muted)' }}>DROP-OFF</span>
           </div>
           <div style={{ fontWeight: 600, fontSize: '15px' }}>{ride.destLocation.name}</div>
-          <div style={{ fontSize: '12px', color: '#64748b' }}>{ride.destLocation.zone} zone</div>
+          <div style={{ fontSize: '12px', color: 'var(--color-muted)' }}>{ride.destLocation.zone} zone</div>
         </div>
       </div>
 
       {/* Fare breakdown */}
       {ride.baseFarePaisa && (
-        <div style={{ background: '#1a2236', borderRadius: '10px', padding: '12px', marginBottom: '12px', fontSize: '13px' }}>
+        <div style={{ background: 'var(--color-surface2)', borderRadius: '10px', padding: '12px', marginBottom: '12px', fontSize: '13px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-            <span style={{ color: '#64748b' }}>Base fare</span>
+            <span style={{ color: 'var(--color-muted)' }}>Base fare</span>
             <span>৳{(ride.baseFarePaisa / 100).toFixed(2)}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-            <span style={{ color: '#64748b' }}>Distance charge</span>
+            <span style={{ color: 'var(--color-muted)' }}>Distance charge</span>
             <span>৳{((ride.distanceChargePaisa || 0) / 100).toFixed(2)}</span>
           </div>
           {isPooled && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', color: '#10b981' }}>
-              <span>Pool discount 🎉</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', color: 'var(--color-success)' }}>
+              <span>Pool discount</span>
               <span>-৳{((ride.poolDiscountPaisa || 0) / 100).toFixed(2)}</span>
             </div>
           )}
           <hr className="divider" />
           <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
             <span>Total</span>
-            <span style={{ color: '#10b981' }}>৳{totalBDT}</span>
+            <span style={{ color: 'var(--color-success)' }}>৳{totalBDT}</span>
           </div>
         </div>
       )}
@@ -160,7 +165,7 @@ export default function PassengerDashboard() {
   };
 
   const navItems = [
-    { href: '/passenger', label: 'Dashboard', icon: <span>🏠</span> },
+    { href: '/passenger', label: 'Dashboard', icon: <Home size={16} /> },
     { href: '/passenger/book', label: 'Book Ride', icon: <Zap size={16} /> },
     { href: '/passenger/rides', label: 'My Rides', icon: <Clock size={16} /> },
   ];
@@ -170,7 +175,7 @@ export default function PassengerDashboard() {
       <div style={{ maxWidth: '800px' }}>
         <div style={{ marginBottom: '24px' }}>
           <h1 style={{ fontSize: '28px', fontWeight: 800 }}>
-            Good day, {user?.name?.split(' ')[0]}! 👋
+            Good day, {user?.name?.split(' ')[0]}!
           </h1>
           <p style={{ color: '#64748b', marginTop: '4px' }}>Ready to pool a ride through Dhaka?</p>
         </div>
@@ -193,7 +198,7 @@ export default function PassengerDashboard() {
             ) : (
               <div style={{ marginBottom: '32px' }}>
                 <div className="glass" style={{ padding: '32px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚡</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}><Zap size={48} color="var(--color-text)" /></div>
                   <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>No active ride</h2>
                   <p style={{ color: '#64748b', marginBottom: '20px' }}>Book a Tesla pool ride through Dhaka</p>
                   <Link href="/passenger/book">
@@ -213,7 +218,7 @@ export default function PassengerDashboard() {
                   <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Recent Rides
                   </h2>
-                  <Link href="/passenger/rides" style={{ fontSize: '13px', color: '#3b82f6', textDecoration: 'none' }}>
+                  <Link href="/passenger/rides" style={{ fontSize: '13px', color: 'var(--color-text)', textDecoration: 'none' }}>
                     View all →
                   </Link>
                 </div>

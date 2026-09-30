@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import SidebarLayout from '@/components/SidebarLayout';
 import { driverApi, Pool } from '@/lib/api';
-import { Car, History, ArrowRight, Users } from 'lucide-react';
+import { Car, History, ArrowRight, Users, Wallet, FolderOpen } from 'lucide-react';
 
 export default function DriverHistoryPage() {
   const { user } = useAuthStore();
@@ -33,15 +33,15 @@ export default function DriverHistoryPage() {
       <div style={{ maxWidth: '800px' }}>
         <div style={{ marginBottom: '24px' }}>
           <h1 style={{ fontSize: '28px', fontWeight: 800 }}>Trip History</h1>
-          <p style={{ color: '#64748b', marginTop: '4px' }}>{pools.length} completed trips</p>
+          <p style={{ color: 'var(--color-muted)', marginTop: '4px' }}>{pools.length} completed trips</p>
         </div>
 
         {/* Stats */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '28px' }}>
           {[
-            { label: 'Total Trips', value: pools.length, icon: '🚗' },
-            { label: 'Passengers Served', value: pools.reduce((s, p) => s + (p.rideRequests?.length || 0), 0), icon: '👥' },
-            { label: 'Total Earnings', value: `৳${(totalEarnings / 100).toFixed(2)}`, icon: '💰' },
+            { label: 'Total Trips', value: pools.length, icon: <Car size={24} color="var(--color-text)" /> },
+            { label: 'Passengers Served', value: pools.reduce((s, p) => s + (p.rideRequests?.length || 0), 0), icon: <Users size={24} color="var(--color-text)" /> },
+            { label: 'Total Earnings', value: `৳${(totalEarnings / 100).toFixed(2)}`, icon: <Wallet size={24} color="var(--color-text)" /> },
           ].map((stat) => (
             <div key={stat.label} className="stat-card">
               <div style={{ fontSize: '24px', marginBottom: '8px' }}>{stat.icon}</div>
@@ -57,7 +57,7 @@ export default function DriverHistoryPage() {
           </div>
         ) : pools.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">📭</div>
+            <div className="empty-state-icon" style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}><FolderOpen size={48} color="var(--color-muted)" /></div>
             <h3 style={{ fontSize: '18px', fontWeight: 600 }}>No trips yet</h3>
             <p>Complete your first trip to see history here</p>
           </div>
@@ -73,15 +73,15 @@ export default function DriverHistoryPage() {
                     <div style={{ fontWeight: 700, marginBottom: '4px' }}>
                       {pool.pickupZone} Zone Pool
                     </div>
-                    <div style={{ fontSize: '12px', color: '#64748b' }}>
+                    <div style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
                       {pool.completedAt ? new Date(pool.completedAt).toLocaleString('en-BD', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '22px', fontWeight: 800, color: '#10b981' }}>
+                    <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--color-success)' }}>
                       ৳{(poolTotal / 100).toFixed(2)}
                     </div>
-                    <div style={{ fontSize: '12px', color: '#64748b' }}>
+                    <div style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
                       <Users size={10} style={{ display: 'inline', marginRight: '4px' }} />
                       {riders.length} passenger{riders.length !== 1 ? 's' : ''}
                     </div>
@@ -89,17 +89,17 @@ export default function DriverHistoryPage() {
                 </div>
 
                 {riders.map(ride => (
-                  <div key={ride.id} style={{ background: '#1a2236', borderRadius: '8px', padding: '10px', marginBottom: '8px', fontSize: '13px' }}>
+                  <div key={ride.id} style={{ background: 'var(--color-surface2)', borderRadius: '8px', padding: '10px', marginBottom: '8px', fontSize: '13px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
                       <span style={{ fontWeight: 600 }}>
                         {(ride as unknown as { passenger?: { name: string } }).passenger?.name}
                       </span>
-                      <span style={{ color: '#64748b' }}>•</span>
+                      <span style={{ color: 'var(--color-muted)' }}>•</span>
                       <span>{ride.pickupLocation?.name}</span>
-                      <ArrowRight size={10} color="#64748b" />
+                      <ArrowRight size={10} color="var(--color-muted)" />
                       <span>{ride.destLocation?.name}</span>
                     </div>
-                    <div style={{ color: '#10b981', fontWeight: 600 }}>
+                    <div style={{ color: 'var(--color-success)', fontWeight: 600 }}>
                       ৳{ride.totalFarePaisa ? (ride.totalFarePaisa / 100).toFixed(2) : '—'}
                     </div>
                   </div>

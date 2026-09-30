@@ -29,14 +29,14 @@ export default function RootLayout({
           position="top-right"
           toastOptions={{
             style: {
-              background: '#1a2236',
-              color: '#f1f5f9',
-              border: '1px solid #1f2d4a',
+              background: 'var(--color-surface2)',
+              color: 'var(--color-text)',
+              border: '1px solid var(--color-border)',
               borderRadius: '10px',
               fontSize: '14px',
             },
-            success: { iconTheme: { primary: '#10b981', secondary: '#f1f5f9' } },
-            error: { iconTheme: { primary: '#ef4444', secondary: '#f1f5f9' } },
+            success: { iconTheme: { primary: 'var(--color-success)', secondary: 'var(--color-bg)' } },
+            error: { iconTheme: { primary: 'var(--color-danger)', secondary: 'var(--color-bg)' } },
           }}
         />
       </body>

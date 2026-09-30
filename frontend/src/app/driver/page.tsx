@@ -6,14 +6,14 @@ import { useAuthStore } from '@/store/authStore';
 import SidebarLayout from '@/components/SidebarLayout';
 import { driverApi, type DriverDashboard, type Pool, type RideRequest } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Power, Users, ArrowRight, Clock, History, CheckCircle, Car } from 'lucide-react';
+import { Power, Users, ArrowRight, Clock, History, CheckCircle, Car, Zap, MapPin, Navigation, Search, Moon } from 'lucide-react';
 
 type DriverAction = 'arrive' | 'start' | 'complete';
 
 const ACTION_CONFIG: Record<string, { label: string; action: DriverAction; color: string; next: string }> = {
-  LOCKED:      { label: '📍 Mark Arrived', action: 'arrive',   color: '#8b5cf6', next: 'DRIVER_ARRIVED' },
-  DRIVER_ARRIVED: { label: '🚗 Start Trip',  action: 'start',    color: '#06b6d4', next: 'STARTED' },
-  IN_PROGRESS:    { label: '✅ Complete Trip', action: 'complete', color: '#10b981', next: 'COMPLETED' },
+  LOCKED:      { label: 'Mark Arrived', action: 'arrive',   color: 'var(--color-text)', next: 'DRIVER_ARRIVED' },
+  DRIVER_ARRIVED: { label: 'Start Trip',  action: 'start',    color: 'var(--color-text)', next: 'STARTED' },
+  IN_PROGRESS:    { label: 'Complete Trip', action: 'complete', color: 'var(--color-success)', next: 'COMPLETED' },
 };
 
 function PoolCard({ pool, onAction, onAccept }: {
@@ -32,7 +32,7 @@ function PoolCard({ pool, onAction, onAccept }: {
           <div style={{ fontWeight: 700, fontSize: '16px', marginBottom: '4px' }}>
             Pool — {pool.pickupZone} Zone
           </div>
-          <div style={{ fontSize: '12px', color: '#64748b' }}>
+          <div style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
             {riders.length} passenger{riders.length !== 1 ? 's' : ''} • {pool.seatsOccupied} seats
           </div>
         </div>
@@ -45,7 +45,7 @@ function PoolCard({ pool, onAction, onAccept }: {
       <div style={{ marginBottom: '16px' }}>
         {riders.map((ride: RideRequest) => (
           <div key={ride.id} style={{
-            background: '#1a2236',
+            background: 'var(--color-surface2)',
             borderRadius: '10px',
             padding: '12px',
             marginBottom: '8px',
@@ -56,19 +56,19 @@ function PoolCard({ pool, onAction, onAccept }: {
                   {(ride as RideRequest & { passenger?: { name: string } }).passenger?.name || 'Passenger'}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
-                  <span style={{ color: '#10b981' }}>{ride.pickupLocation?.name}</span>
-                  <ArrowRight size={12} color="#64748b" />
-                  <span style={{ color: '#ef4444' }}>{ride.destLocation?.name}</span>
+                  <span style={{ color: 'var(--color-success)' }}>{ride.pickupLocation?.name}</span>
+                  <ArrowRight size={12} color="var(--color-muted)" />
+                  <span style={{ color: 'var(--color-danger)' }}>{ride.destLocation?.name}</span>
                 </div>
-                <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
+                <div style={{ fontSize: '12px', color: 'var(--color-muted)', marginTop: '4px' }}>
                   {ride.seatsRequested} seat • {ride.paymentMethod}
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: 700, color: '#10b981' }}>
+                <div style={{ fontWeight: 700, color: 'var(--color-success)' }}>
                   ৳{ride.totalFarePaisa ? (ride.totalFarePaisa / 100).toFixed(2) : '—'}
                 </div>
-                <span className={`badge badge-${ride.status.toLowerCase().replace('_', '-')}`} style={{ fontSize: '10px', marginTop: '4px' }}>
+                <span className={`badge`} style={{ fontSize: '10px', marginTop: '4px', display: 'inline-block', padding: '2px 6px', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-muted)' }}>
                   {ride.status}
                 </span>
               </div>
@@ -90,7 +90,7 @@ function PoolCard({ pool, onAction, onAccept }: {
       {actionConfig && (
         <button
           className="btn btn-full"
-          style={{ background: actionConfig.color, color: 'white', boxShadow: `0 4px 15px ${actionConfig.color}44` }}
+          style={{ background: actionConfig.color, color: 'var(--color-bg)', border: 'none' }}
           onClick={() => onAction(pool.id, actionConfig.action)}
         >
           {actionConfig.label}
@@ -131,7 +131,7 @@ export default function DriverDashboard() {
         toast.success('You are now OFFLINE');
       } else {
         await driverApi.goOnline();
-        toast.success('You are now ONLINE ⚡');
+        toast.success('You are now ONLINE');
       }
       loadDashboard();
     } catch (err: unknown) {
@@ -142,7 +142,7 @@ export default function DriverDashboard() {
   const handleAccept = async (poolId: string) => {
     try {
       await driverApi.acceptPool(poolId);
-      toast.success('Pool accepted! Passengers notified 🎉');
+      toast.success('Pool accepted! Passengers notified');
       loadDashboard();
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Failed to accept pool');
@@ -153,9 +153,9 @@ export default function DriverDashboard() {
     try {
       await driverApi.updateStatus(poolId, action);
       const msgs: Record<DriverAction, string> = {
-        arrive: '📍 Arrival marked! Passengers notified.',
-        start: '🚗 Trip started! Drive safe.',
-        complete: '✅ Trip completed! Great job.',
+        arrive: 'Arrival marked! Passengers notified.',
+        start: 'Trip started! Drive safe.',
+        complete: 'Trip completed! Great job.',
       };
       toast.success(msgs[action]);
       loadDashboard();
@@ -181,8 +181,8 @@ export default function DriverDashboard() {
           <h1 style={{ fontSize: '28px', fontWeight: 800 }}>
             Driver Dashboard
           </h1>
-          <p style={{ color: '#64748b', marginTop: '4px' }}>
-            Welcome, {user?.name?.split(' ')[0]}! 🚗
+          <p style={{ color: 'var(--color-muted)', marginTop: '4px' }}>
+            Welcome, {user?.name?.split(' ')[0]}!
           </p>
         </div>
 
@@ -200,21 +200,22 @@ export default function DriverDashboard() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
                       <div style={{
                         width: '48px', height: '48px',
-                        background: 'linear-gradient(135deg, #1a2236, #0d1b3e)',
+                        background: 'var(--color-surface2)',
+                        border: '1px solid var(--color-border)',
                         borderRadius: '12px',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: '24px',
-                      }}>⚡</div>
+                      }}><Zap size={24} color="var(--color-text)" /></div>
                       <div>
                         <div style={{ fontWeight: 800, fontSize: '20px' }}>{tesla.name}</div>
-                        <div style={{ fontSize: '13px', color: '#64748b' }}>{tesla.licensePlate}</div>
+                        <div style={{ fontSize: '13px', color: 'var(--color-muted)' }}>{tesla.licensePlate}</div>
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span className={`badge badge-${tesla.status.toLowerCase().replace('_', '-')}`}>
+                      <span className={`badge`} style={{ padding: '4px 8px', background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
                         {tesla.status}
                       </span>
-                      <span style={{ fontSize: '13px', color: '#64748b' }}>
+                      <span style={{ fontSize: '13px', color: 'var(--color-muted)' }}>
                         <Users size={12} style={{ display: 'inline' }} /> {tesla.capacity} seats
                       </span>
                     </div>
@@ -235,22 +236,22 @@ export default function DriverDashboard() {
             {/* Active Pools */}
             {!isOnline && activePools.length === 0 ? (
               <div className="glass" style={{ padding: '48px', textAlign: 'center' }}>
-                <div style={{ fontSize: '48px', marginBottom: '16px' }}>💤</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}><Moon size={48} color="var(--color-muted)" /></div>
                 <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>You&apos;re Offline</h2>
-                <p style={{ color: '#64748b', marginBottom: '20px' }}>Go online to start accepting rides</p>
+                <p style={{ color: 'var(--color-muted)', marginBottom: '20px' }}>Go online to start accepting rides</p>
                 <button className="btn btn-success btn-lg" onClick={toggleStatus}>
                   <Power size={16} /> Go Online
                 </button>
               </div>
             ) : activePools.length === 0 ? (
               <div className="glass" style={{ padding: '48px', textAlign: 'center' }}>
-                <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}><Search size={48} color="var(--color-muted)" /></div>
                 <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>No Active Pools</h2>
-                <p style={{ color: '#64748b' }}>Passengers are booking — pools will appear here</p>
+                <p style={{ color: 'var(--color-muted)' }}>Passengers are booking — pools will appear here</p>
               </div>
             ) : (
               <div>
-                <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px' }}>
+                <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px' }}>
                   Active Pools ({activePools.length})
                 </h2>
                 {activePools.map((pool: Pool) => (
