@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "npm --prefix backend test",
+    "test:coverage": "npm --prefix backend run test:coverage"
   },
   "dependencies": {
     "lucide-react": "^1.49.0",
