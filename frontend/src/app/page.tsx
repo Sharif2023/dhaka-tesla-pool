@@ -112,14 +112,15 @@ export default function HomePage() {
       }} />
 
       {/* Hero content */}
-      <div style={{ textAlign: 'center', maxWidth: '700px', width: '100%', animation: 'fadeIn 0.6s ease forwards' }}>
+      <div style={{ textAlign: 'center', maxWidth: '1040px', width: '100%', animation: 'fadeIn 0.6s ease forwards', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         {/* Logo */}
-        <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ marginBottom: '28px', display: 'flex', justifyContent: 'center' }}>
           <div style={{
             width: '64px', height: '64px',
             background: 'var(--color-accent)',
             borderRadius: '16px',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 8px 30px rgba(255, 255, 255, 0.12)',
           }}>
             <Zap size={36} color="var(--color-bg)" />
           </div>
@@ -131,15 +132,15 @@ export default function HomePage() {
           Dhaka Tesla Pool
         </h1>
 
-        <p style={{ fontSize: '22px', color: 'var(--color-muted)', marginBottom: '12px', fontWeight: 500 }}>
+        <p style={{ fontSize: '22px', color: 'var(--color-muted)', marginBottom: '8px', fontWeight: 500 }}>
           Share a seat. Split the fare.
         </p>
-        <p style={{ fontSize: '18px', color: 'var(--color-muted)', marginBottom: '40px', opacity: 0.8 }}>
+        <p style={{ fontSize: '18px', color: 'var(--color-muted)', marginBottom: '36px', opacity: 0.8 }}>
           Survive Dhaka traffic.
         </p>
 
         {/* CTA Buttons */}
-        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '28px' }}>
+        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '24px' }}>
           <Link href="/auth/login" style={{ textDecoration: 'none' }}>
             <button className="btn btn-primary btn-lg">
               Sign In
@@ -153,12 +154,12 @@ export default function HomePage() {
         </div>
 
         {/* Sleek Wide Demo Credentials Trigger Button */}
-        <div style={{ marginBottom: '48px', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ marginBottom: '40px', display: 'flex', justifyContent: 'center', width: '100%' }}>
           <button
             id="view-demo-modal-btn"
             type="button"
             onClick={() => setShowDemoModal(true)}
-            className="btn btn-outline"
+            className="btn btn-outline hover-card"
             style={{
               width: '100%',
               maxWidth: '460px',
@@ -173,7 +174,6 @@ export default function HomePage() {
               gap: '10px',
               cursor: 'pointer',
               fontSize: '14px',
-              transition: 'all 0.2s ease',
             }}
           >
             <Key size={16} color="var(--color-muted)" />
@@ -191,28 +191,54 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* Feature pills */}
-        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+        {/* Modern Interactive Feature Cards Showcase */}
+        <div style={{
+          width: '100%',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(185px, 1fr))',
+          gap: '14px',
+          marginTop: '6px',
+        }}>
           {[
-            { icon: <Zap size={14} />, text: 'Battery-powered Teslas' },
-            { icon: <Target size={14} />, text: 'Smart pool matching' },
-            { icon: <CreditCard size={14} />, text: 'Fair fare splitting' },
-            { icon: <MapPin size={14} />, text: 'Real-time tracking' },
-            { icon: <ShieldCheck size={14} />, text: 'Secure auth' },
+            {
+              icon: <Zap size={18} />,
+              title: 'Battery-powered Teslas',
+              desc: 'Custom 3-seat electric fleet built for Banani traffic',
+            },
+            {
+              icon: <Target size={18} />,
+              title: 'Smart pool matching',
+              desc: 'Algorithmic route grouping and seat allocation',
+            },
+            {
+              icon: <CreditCard size={18} />,
+              title: 'Fair fare splitting',
+              desc: 'Transparent 30% pooling discount per passenger',
+            },
+            {
+              icon: <MapPin size={18} />,
+              title: 'Real-time tracking',
+              desc: 'Live trip lifecycle from dispatch to arrival',
+            },
+            {
+              icon: <ShieldCheck size={18} />,
+              title: 'Secure auth',
+              desc: 'Role-based access for drivers & riders',
+            },
           ].map((feat) => (
-            <span key={feat.text} style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 16px',
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '20px',
-              fontSize: '13px',
-              color: 'var(--color-muted)',
-            }}>
-              {feat.icon} {feat.text}
-            </span>
+            <div key={feat.title} className="feature-card">
+              <div className="feature-icon-badge">
+                {feat.icon}
+              </div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontWeight: 600, fontSize: '14px', color: 'var(--color-text)', marginBottom: '4px' }}>
+                  {feat.title}
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--color-muted)', lineHeight: 1.4 }}>
+                  {feat.desc}
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </div>

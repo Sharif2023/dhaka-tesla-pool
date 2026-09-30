@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { ApiError } from '@/lib/api';
-import { Zap, Car, User } from 'lucide-react';
+import { Zap, Car, User, ArrowLeft } from 'lucide-react';
 
 export default function LoginPage() {
   const [phone, setPhone] = useState('');
@@ -54,11 +54,48 @@ export default function LoginPage() {
       padding: '20px',
     }}>
       <div style={{ width: '100%', maxWidth: '420px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
-            <Zap size={40} color="var(--color-text)" />
-          </div>
-          <h1 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '8px' }}>Welcome back</h1>
+        {/* Back to Landing Page link */}
+        <div style={{ marginBottom: '18px' }}>
+          <Link
+            id="back-to-home-link"
+            href="/"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              color: 'var(--color-muted)',
+              textDecoration: 'none',
+              fontSize: '13px',
+              fontWeight: 500,
+              padding: '6px 12px',
+              borderRadius: '8px',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid var(--color-border)',
+            }}
+            className="hover-card"
+          >
+            <ArrowLeft size={14} /> Back to home
+          </Link>
+        </div>
+
+        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+          <Link href="/" style={{ textDecoration: 'none', color: 'inherit', display: 'inline-block' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '12px',
+                background: 'var(--color-accent)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 20px rgba(255, 255, 255, 0.1)',
+              }}>
+                <Zap size={28} color="var(--color-bg)" />
+              </div>
+            </div>
+            <h1 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '6px' }}>Welcome back</h1>
+          </Link>
           <p style={{ color: 'var(--color-muted)', fontSize: '14px' }}>Sign in to Dhaka Tesla Pool</p>
         </div>
 
