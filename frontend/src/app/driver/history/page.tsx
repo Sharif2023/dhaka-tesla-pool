@@ -2,23 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/authStore';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 import SidebarLayout from '@/components/SidebarLayout';
 import { driverApi, Pool } from '@/lib/api';
 import { Car, History, ArrowRight, Users, Wallet, FolderOpen } from 'lucide-react';
 
 export default function DriverHistoryPage() {
-  const { user } = useAuthStore();
-  const router = useRouter();
+  const { user, isReady } = useAuthGuard('DRIVER');
   const [pools, setPools] = useState<Pool[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user || user.role !== 'DRIVER') { router.push('/auth/login'); return; }
+    if (!isReady) return;
     driverApi.getHistory()
       .then(res => { setPools(res.data.pools); setLoading(false); })
       .catch(() => setLoading(false));
-  }, [user]);
+  }, [isReady]);
 
   const navItems = [
     { href: '/driver', label: 'Dashboard', icon: <Car size={16} /> },
@@ -28,9 +27,17 @@ export default function DriverHistoryPage() {
   const totalEarnings = pools.reduce((sum, p) =>
     sum + (p.rideRequests?.reduce((s, r) => s + (r.totalFarePaisa || 0), 0) || 0), 0);
 
+  if (!isReady) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg)' }}>
+        <span className="spinner" style={{ width: '32px', height: '32px', borderWidth: '3px' }} />
+      </div>
+    );
+  }
+
   return (
     <SidebarLayout navItems={navItems} role="DRIVER">
-      <div style={{ maxWidth: '880px', width: '100%' }}>
+      <div style={{ maxWidth: '1100px', width: '100%' }}>
         {/* Header */}
         <div style={{
           display: 'flex',

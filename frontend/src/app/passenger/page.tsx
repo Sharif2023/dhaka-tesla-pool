@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/authStore';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 import SidebarLayout from '@/components/SidebarLayout';
 import Link from 'next/link';
 import { rideApi, RideRequest } from '@/lib/api';
@@ -129,19 +128,10 @@ function RideCard({ ride, onCancel }: { ride: RideRequest; onCancel: (id: string
 }
 
 export default function PassengerDashboard() {
-  const { user } = useAuthStore();
-  const router = useRouter();
+  const { user, isReady } = useAuthGuard('PASSENGER');
   const [activeRide, setActiveRide] = useState<RideRequest | null>(null);
   const [recentRides, setRecentRides] = useState<RideRequest[]>([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!user) { router.push('/auth/login'); return; }
-    if (user.role !== 'PASSENGER') { router.push('/driver'); return; }
-    loadRides();
-    const interval = setInterval(loadRides, 8000); // Poll for updates
-    return () => clearInterval(interval);
-  }, [user]);
 
   const loadRides = async () => {
     try {
@@ -151,8 +141,17 @@ export default function PassengerDashboard() {
       setActiveRide(active || null);
       setRecentRides(rides.slice(0, 5));
       setLoading(false);
-    } catch { setLoading(false); }
+    } catch {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    if (!isReady) return;
+    loadRides();
+    const interval = setInterval(loadRides, 8000); // Poll for updates
+    return () => clearInterval(interval);
+  }, [isReady]);
 
   const handleCancel = async (id: string) => {
     try {
@@ -170,9 +169,17 @@ export default function PassengerDashboard() {
     { href: '/passenger/rides', label: 'My Rides', icon: <Clock size={16} /> },
   ];
 
+  if (!isReady) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg)' }}>
+        <span className="spinner" style={{ width: '32px', height: '32px', borderWidth: '3px' }} />
+      </div>
+    );
+  }
+
   return (
     <SidebarLayout navItems={navItems} role="PASSENGER">
-      <div style={{ maxWidth: '800px' }}>
+      <div style={{ maxWidth: '1100px', width: '100%' }}>
         <div style={{ marginBottom: '24px' }}>
           <h1 style={{ fontSize: '28px', fontWeight: 800 }}>
             Good day, {user?.name?.split(' ')[0]}!
