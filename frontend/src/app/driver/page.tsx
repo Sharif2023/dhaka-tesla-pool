@@ -194,7 +194,7 @@ export default function DriverDashboard() {
           <>
             {/* Tesla status card */}
             {tesla && (
-              <div className="card" style={{ marginBottom: '24px', border: `1px solid ${isOnline ? 'rgba(16, 185, 129, 0.3)' : '#1f2d4a'}` }}>
+              <div className="card" style={{ marginBottom: '24px', border: `1px solid ${isOnline ? 'rgba(16, 185, 129, 0.3)' : 'var(--color-border)'}` }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>

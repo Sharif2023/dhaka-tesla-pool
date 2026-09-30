@@ -34,7 +34,7 @@ export default function SidebarLayout({ children, navItems, role }: SidebarLayou
       {/* Sidebar */}
       <aside className="sidebar">
         {/* Logo */}
-        <div style={{ padding: '0 24px 24px', borderBottom: '1px solid #1f2d4a' }}>
+        <div style={{ padding: '0 24px 24px', borderBottom: '1px solid var(--color-border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
               width: '36px', height: '36px',
@@ -46,7 +46,7 @@ export default function SidebarLayout({ children, navItems, role }: SidebarLayou
             </div>
             <div>
               <div style={{ fontWeight: 800, fontSize: '14px' }}>Dhaka Tesla</div>
-              <div style={{ fontSize: '11px', color: '#64748b' }}>Pool</div>
+              <div style={{ fontSize: '11px', color: 'var(--color-muted)' }}>Pool</div>
             </div>
           </div>
         </div>

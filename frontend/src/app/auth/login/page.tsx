@@ -91,7 +91,7 @@ export default function LoginPage() {
           <hr className="divider" />
 
           {/* Quick login buttons */}
-          <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '12px', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <p style={{ fontSize: '12px', color: 'var(--color-muted)', marginBottom: '12px', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Quick demo login
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -116,7 +116,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '14px', color: '#64748b' }}>
+        <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '14px', color: 'var(--color-muted)' }}>
           No account?{' '}
           <Link href="/auth/register" style={{ color: 'var(--color-text)', textDecoration: 'none', fontWeight: 600 }}>
             Register here
