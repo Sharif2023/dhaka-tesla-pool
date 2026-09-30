@@ -3,8 +3,8 @@
  * Tests: capacity enforcement, state transitions, authorization
  */
 import request from 'supertest';
-import { app } from '../../app';
-import { prisma } from '../../config/database';
+import { app } from '../app';
+import { prisma } from '../config/database';
 import bcrypt from 'bcryptjs';
 
 // Test tokens stored for reuse
@@ -39,9 +39,9 @@ beforeAll(async () => {
   });
 
   const locations = await prisma.location.findMany();
-  bananiId    = locations.find(l => l.name === 'Banani')!.id;
-  mohakhaliId = locations.find(l => l.name === 'Mohakhali')!.id;
-  gulshan1Id  = locations.find(l => l.name === 'Gulshan 1')!.id;
+  bananiId    = locations.find((l: any) => l.name === 'Banani')!.id;
+  mohakhaliId = locations.find((l: any) => l.name === 'Mohakhali')!.id;
+  gulshan1Id  = locations.find((l: any) => l.name === 'Gulshan 1')!.id;
 
   const hash = await bcrypt.hash('Tesla@2024', 10);
 
