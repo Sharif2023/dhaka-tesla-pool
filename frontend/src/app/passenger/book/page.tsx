@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store/authStore';
 import SidebarLayout from '@/components/SidebarLayout';
 import { locationApi, rideApi, Location, FareEstimate } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Zap, Clock, MapPin, ArrowRight, Loader } from 'lucide-react';
+import { Zap, Clock, MapPin, ArrowRight, Loader, Home, Wallet, Banknote, Sparkles } from 'lucide-react';
 
 export default function BookRidePage() {
   const { user } = useAuthStore();
@@ -53,7 +53,7 @@ export default function BookRidePage() {
       });
       setBooked(true);
       const isPooled = res.data.isPooled;
-      toast.success(isPooled ? '🎉 Matched to existing pool! Share the fare.' : '⚡ Ride requested! Waiting for driver.');
+      toast.success(isPooled ? 'Matched to existing pool! Share the fare.' : 'Ride requested! Waiting for driver.');
       setTimeout(() => router.push('/passenger'), 2000);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to book ride';
@@ -63,7 +63,7 @@ export default function BookRidePage() {
   };
 
   const navItems = [
-    { href: '/passenger', label: 'Dashboard', icon: <span>🏠</span> },
+    { href: '/passenger', label: 'Dashboard', icon: <Home size={16} /> },
     { href: '/passenger/book', label: 'Book Ride', icon: <Zap size={16} /> },
     { href: '/passenger/rides', label: 'My Rides', icon: <Clock size={16} /> },
   ];
@@ -77,9 +77,9 @@ export default function BookRidePage() {
     return (
       <SidebarLayout navItems={navItems} role="PASSENGER">
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-          <div style={{ fontSize: '64px', marginBottom: '20px' }}>⚡</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}><Zap size={64} color="var(--color-text)" /></div>
           <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>Ride Booked!</h2>
-          <p style={{ color: '#64748b' }}>Redirecting to your dashboard...</p>
+          <p style={{ color: 'var(--color-muted)' }}>Redirecting to your dashboard...</p>
           <span className="spinner" style={{ marginTop: '20px', width: '24px', height: '24px' }} />
         </div>
       </SidebarLayout>
@@ -91,13 +91,13 @@ export default function BookRidePage() {
       <div style={{ maxWidth: '680px' }}>
         <div style={{ marginBottom: '24px' }}>
           <h1 style={{ fontSize: '28px', fontWeight: 800 }}>Book a Ride</h1>
-          <p style={{ color: '#64748b', marginTop: '4px' }}>Get matched with a Tesla pool or ride solo</p>
+          <p style={{ color: 'var(--color-muted)', marginTop: '4px' }}>Get matched with a Tesla pool or ride solo</p>
         </div>
 
         <form onSubmit={handleBook}>
           <div className="card" style={{ marginBottom: '16px' }}>
-            <h2 style={{ fontWeight: 700, marginBottom: '20px', fontSize: '16px' }}>
-              📍 Where are you going?
+            <h2 style={{ fontWeight: 700, marginBottom: '20px', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <MapPin size={18} /> Where are you going?
             </h2>
 
             <div className="form-group">
@@ -119,7 +119,7 @@ export default function BookRidePage() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0' }}>
-              <ArrowRight size={20} color="#64748b" style={{ transform: 'rotate(90deg)' }} />
+              <ArrowRight size={20} color="var(--color-muted)" style={{ transform: 'rotate(90deg)' }} />
             </div>
 
             <div className="form-group">
@@ -164,8 +164,8 @@ export default function BookRidePage() {
                   value={form.payment}
                   onChange={e => setForm(p => ({ ...p, payment: e.target.value }))}
                 >
-                  <option value="CASH">💵 Cash</option>
-                  <option value="TESLA_PAY">⚡ TeslaPay</option>
+                  <option value="CASH">Cash</option>
+                  <option value="TESLA_PAY">TeslaPay</option>
                 </select>
               </div>
             </div>
@@ -187,42 +187,44 @@ export default function BookRidePage() {
           {/* Fare estimate */}
           {(estimating || estimate) && (
             <div className="card" style={{ marginBottom: '16px' }}>
-              <h2 style={{ fontWeight: 700, marginBottom: '16px', fontSize: '16px' }}>
-                💰 Fare Estimate
+              <h2 style={{ fontWeight: 700, marginBottom: '16px', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Wallet size={18} /> Fare Estimate
               </h2>
               {estimating ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-muted)' }}>
                   <Loader size={16} style={{ animation: 'spin 1s linear infinite' }} />
                   Calculating fare...
                 </div>
               ) : estimate ? (
                 <div>
-                  <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '12px' }}>
+                  <div style={{ fontSize: '13px', color: 'var(--color-muted)', marginBottom: '12px' }}>
                     Distance: ~{(estimate.distanceMeters / 1000).toFixed(1)} km
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     {/* Solo */}
-                    <div style={{ background: '#1a2236', borderRadius: '10px', padding: '16px' }}>
-                      <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>Solo ride</div>
-                      <div style={{ fontSize: '28px', fontWeight: 800, color: '#f1f5f9' }}>
+                    <div style={{ background: 'var(--color-surface2)', borderRadius: '10px', padding: '16px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--color-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>Solo ride</div>
+                      <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--color-text)' }}>
                         ৳{estimate.soloFare.totalBDT}
                       </div>
-                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '8px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--color-muted)', marginTop: '8px' }}>
                         Base: ৳{estimate.soloFare.breakdown.baseFareBDT} + Dist: ৳{estimate.soloFare.breakdown.distanceChargeBDT}
                       </div>
                     </div>
                     {/* Pool */}
                     <div style={{ background: 'rgba(16, 185, 129, 0.08)', borderRadius: '10px', padding: '16px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-                      <div style={{ fontSize: '12px', color: '#10b981', marginBottom: '8px', textTransform: 'uppercase' }}>Pooled 🎉</div>
-                      <div style={{ fontSize: '28px', fontWeight: 800, color: '#10b981' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--color-success)', marginBottom: '8px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Sparkles size={12} /> Pooled
+                      </div>
+                      <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--color-success)' }}>
                         ৳{estimate.poolFare.totalBDT}
                       </div>
-                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '8px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--color-muted)', marginTop: '8px' }}>
                         Save ৳{estimate.poolFare.breakdown.poolDiscountBDT} with pool
                       </div>
                     </div>
                   </div>
-                  <p style={{ fontSize: '12px', color: '#64748b', marginTop: '12px' }}>
+                  <p style={{ fontSize: '12px', color: 'var(--color-muted)', marginTop: '12px' }}>
                     * Pool discount applied if matched with another passenger in same zone
                   </p>
                 </div>

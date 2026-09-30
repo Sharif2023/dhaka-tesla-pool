@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { ApiError } from '@/lib/api';
+import { Zap, Car, User } from 'lucide-react';
 
 export default function LoginPage() {
   const [phone, setPhone] = useState('');
@@ -18,7 +19,7 @@ export default function LoginPage() {
     try {
       await login(phone, password);
       const user = useAuthStore.getState().user;
-      toast.success(`Welcome back, ${user?.name}! 👋`);
+      toast.success(`Welcome back, ${user?.name}!`);
       router.push(user?.role === 'DRIVER' ? '/driver' : '/passenger');
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Login failed';
@@ -34,7 +35,7 @@ export default function LoginPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0a0f1e 0%, #111827 100%)',
+      background: 'var(--color-bg)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -42,9 +43,11 @@ export default function LoginPage() {
     }}>
       <div style={{ width: '100%', maxWidth: '420px' }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <span style={{ fontSize: '40px' }}>⚡</span>
-          <h1 style={{ fontSize: '28px', fontWeight: 800, marginTop: '12px', marginBottom: '8px' }}>Welcome back</h1>
-          <p style={{ color: '#64748b', fontSize: '14px' }}>Sign in to Dhaka Tesla Pool</p>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+            <Zap size={40} color="var(--color-text)" />
+          </div>
+          <h1 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '8px' }}>Welcome back</h1>
+          <p style={{ color: 'var(--color-muted)', fontSize: '14px' }}>Sign in to Dhaka Tesla Pool</p>
         </div>
 
         <div className="glass" style={{ padding: '32px' }}>
@@ -88,15 +91,15 @@ export default function LoginPage() {
           <hr className="divider" />
 
           {/* Quick login buttons */}
-          <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '12px', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <p style={{ fontSize: '12px', color: 'var(--color-muted)', marginBottom: '12px', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Quick demo login
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             {[
-              { label: '🚗 Jashim (Driver)', phone: '+8801711000001' },
-              { label: '👩 Nusrat', phone: '+8801811000002' },
-              { label: '👨 Rafiq', phone: '+8801911000003' },
-              { label: '👩 Shirin', phone: '+8801611000004' },
+              { icon: <Car size={14}/>, label: 'Jashim (Driver)', phone: '+8801711000001' },
+              { icon: <User size={14}/>, label: 'Nusrat', phone: '+8801811000002' },
+              { icon: <User size={14}/>, label: 'Rafiq', phone: '+8801911000003' },
+              { icon: <User size={14}/>, label: 'Shirin', phone: '+8801611000004' },
             ].map((u) => (
               <button
                 key={u.phone}
@@ -105,20 +108,22 @@ export default function LoginPage() {
                 onClick={() => quickLogin(u.phone)}
                 style={{ fontSize: '12px', textAlign: 'left', justifyContent: 'flex-start' }}
               >
-                {u.label}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  {u.icon} {u.label}
+                </div>
               </button>
             ))}
           </div>
         </div>
 
-        <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '14px', color: '#64748b' }}>
+        <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '14px', color: 'var(--color-muted)' }}>
           No account?{' '}
-          <Link href="/auth/register" style={{ color: '#3b82f6', textDecoration: 'none', fontWeight: 600 }}>
+          <Link href="/auth/register" style={{ color: 'var(--color-text)', textDecoration: 'none', fontWeight: 600 }}>
             Register here
           </Link>
         </p>
-        <p style={{ textAlign: 'center', marginTop: '8px', fontSize: '13px', color: '#475569' }}>
-          Password for all demo accounts: <code style={{ color: '#8b5cf6' }}>Tesla@2024</code>
+        <p style={{ textAlign: 'center', marginTop: '8px', fontSize: '13px', color: 'var(--color-muted)' }}>
+          Password for all demo accounts: <code style={{ color: 'var(--color-text)', background: 'rgba(255,255,255,0.1)', padding: '2px 4px', borderRadius: '4px' }}>Tesla@2024</code>
         </p>
       </div>
     </div>

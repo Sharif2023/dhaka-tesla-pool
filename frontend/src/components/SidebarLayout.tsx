@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
-import { Car, Home, MapPin, History, Wallet, LogOut, Zap } from 'lucide-react';
+import { Car, Home, MapPin, History, Wallet, LogOut, Zap, User } from 'lucide-react';
 
 interface NavItem {
   href: string;
@@ -34,38 +34,39 @@ export default function SidebarLayout({ children, navItems, role }: SidebarLayou
       {/* Sidebar */}
       <aside className="sidebar">
         {/* Logo */}
-        <div style={{ padding: '0 24px 24px', borderBottom: '1px solid #1f2d4a' }}>
+        <div style={{ padding: '0 24px 24px', borderBottom: '1px solid var(--color-border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
               width: '36px', height: '36px',
-              background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+              background: 'var(--color-accent)',
               borderRadius: '10px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <Zap size={18} color="white" />
+              <Zap size={18} color="var(--color-bg)" />
             </div>
             <div>
               <div style={{ fontWeight: 800, fontSize: '14px' }}>Dhaka Tesla</div>
-              <div style={{ fontSize: '11px', color: '#64748b' }}>Pool</div>
+              <div style={{ fontSize: '11px', color: 'var(--color-muted)' }}>Pool</div>
             </div>
           </div>
         </div>
 
         {/* User info */}
-        <div style={{ padding: '16px 24px', borderBottom: '1px solid #1f2d4a' }}>
+        <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-border)' }}>
           <div style={{
             width: '40px', height: '40px',
-            background: role === 'DRIVER' ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #3b82f6, #2563eb)',
+            background: 'var(--color-surface2)',
+            border: '1px solid var(--color-border)',
             borderRadius: '50%',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 700, fontSize: '16px', color: 'white', marginBottom: '8px',
+            fontWeight: 700, fontSize: '16px', color: 'var(--color-text)', marginBottom: '8px',
           }}>
             {user?.name?.[0] || '?'}
           </div>
           <div style={{ fontWeight: 600, fontSize: '14px' }}>{user?.name}</div>
-          <div style={{ fontSize: '12px', color: '#64748b' }}>{user?.phone}</div>
-          <span className={`badge badge-${role.toLowerCase()}`} style={{ marginTop: '6px' }}>
-            {role === 'DRIVER' ? '🚗' : '🧑'} {role}
+          <div style={{ fontSize: '12px', color: 'var(--color-muted)' }}>{user?.phone}</div>
+          <span className={`badge`} style={{ marginTop: '6px', display: 'inline-flex', gap: '4px', alignItems: 'center', background: 'var(--color-surface2)', border: '1px solid var(--color-border)', color: 'var(--color-muted)' }}>
+            {role === 'DRIVER' ? <Car size={12} /> : <User size={12} />} {role}
           </span>
         </div>
 
