@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
@@ -13,10 +13,49 @@ export default function RegisterPage() {
   const { register, isLoading } = useAuthStore();
   const router = useRouter();
 
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('dhaka-tesla-pool-auth');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.state?.user?.role) {
+          router.replace(parsed.state.user.role === 'DRIVER' ? '/driver' : '/passenger');
+        }
+      }
+    } catch {}
+  }, [router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Clean and normalize phone number
+    let cleanedPhone = form.phone.trim().replace(/[\s\-()]/g, '');
+    if (cleanedPhone.startsWith('01')) {
+      cleanedPhone = '+8801' + cleanedPhone.slice(2);
+    } else if (cleanedPhone.startsWith('8801')) {
+      cleanedPhone = '+' + cleanedPhone;
+    }
+
+    if (!/^\+8801[3-9]\d{8}$/.test(cleanedPhone)) {
+      toast.error('Valid Bangladeshi phone required (e.g. 017XXXXXXXX or +8801XXXXXXXXX)');
+      return;
+    }
+
+    if (form.password.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+
+    const cleanedEmail = form.email.trim();
+
     try {
-      await register({ ...form, email: form.email || undefined });
+      await register({
+        name: form.name.trim(),
+        phone: cleanedPhone,
+        email: cleanedEmail || undefined,
+        password: form.password,
+        role: form.role,
+      });
       const user = useAuthStore.getState().user;
       toast.success(`Welcome to Dhaka Tesla Pool, ${user?.name}!`);
       router.push(form.role === 'DRIVER' ? '/driver' : '/passenger');
@@ -87,7 +126,7 @@ export default function RegisterPage() {
 
             <div className="form-group">
               <label className="label">Phone Number</label>
-              <input id="phone" className="input" type="tel" placeholder="+8801XXXXXXXXX"
+              <input id="phone" className="input" type="tel" placeholder="01XXXXXXXXX or +8801XXXXXXXXX"
                 value={form.phone} onChange={e => update('phone', e.target.value)} required />
             </div>
 

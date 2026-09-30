@@ -22,7 +22,16 @@ async function fetchApi<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('dtp_token') : null;
+  let token = typeof window !== 'undefined' ? localStorage.getItem('dtp_token') : null;
+  if (!token && typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('dhaka-tesla-pool-auth');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.state?.token) token = parsed.state.token;
+      }
+    } catch {}
+  }
 
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -38,7 +47,11 @@ async function fetchApi<T>(
   const data = await response.json();
 
   if (!response.ok) {
-    throw new ApiError(response.status, data.message || 'Request failed');
+    let errMsg = data.message || 'Request failed';
+    if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+      errMsg = data.errors.map((e: { message?: string; field?: string }) => e.message || `${e.field} is invalid`).join(', ');
+    }
+    throw new ApiError(response.status, errMsg);
   }
 
   return data;

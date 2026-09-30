@@ -8,18 +8,59 @@ import { AppError } from '../utils/errors';
 import { handleValidationErrors } from '../middleware/errorHandler';
 import { logger } from '../utils/logger';
 
+import { TeslaStatus } from '@prisma/client';
+
 // ─── Validators ───
 export const registerValidators = [
-  body('name').trim().notEmpty().withMessage('Name is required').isLength({ min: 2, max: 100 }),
-  body('phone').trim().notEmpty().matches(/^\+8801[3-9]\d{8}$/).withMessage('Valid BD phone required (+8801XXXXXXXXX)'),
-  body('email').optional().isEmail().normalizeEmail(),
-  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-  body('role').isIn(['PASSENGER', 'DRIVER']).withMessage('Role must be PASSENGER or DRIVER'),
+  body('name')
+    .trim()
+    .notEmpty()
+    .withMessage('Name is required')
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Name must be between 2 and 100 characters'),
+  body('phone')
+    .trim()
+    .notEmpty()
+    .withMessage('Phone number is required')
+    .customSanitizer((val: string) => {
+      let cleaned = String(val || '').replace(/[\s\-()]/g, '');
+      if (cleaned.startsWith('01')) {
+        cleaned = '+8801' + cleaned.slice(2);
+      } else if (cleaned.startsWith('8801')) {
+        cleaned = '+' + cleaned;
+      }
+      return cleaned;
+    })
+    .matches(/^\+8801[3-9]\d{8}$/)
+    .withMessage('Valid Bangladeshi phone number required (+8801XXXXXXXXX or 01XXXXXXXXX)'),
+  body('email')
+    .optional({ checkFalsy: true, nullable: true })
+    .isEmail()
+    .withMessage('Must be a valid email address')
+    .normalizeEmail(),
+  body('password')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters'),
+  body('role')
+    .isIn(['PASSENGER', 'DRIVER'])
+    .withMessage('Role must be PASSENGER or DRIVER'),
   handleValidationErrors,
 ];
 
 export const loginValidators = [
-  body('phone').trim().notEmpty().withMessage('Phone is required'),
+  body('phone')
+    .trim()
+    .notEmpty()
+    .withMessage('Phone is required')
+    .customSanitizer((val: string) => {
+      let cleaned = String(val || '').replace(/[\s\-()]/g, '');
+      if (cleaned.startsWith('01')) {
+        cleaned = '+8801' + cleaned.slice(2);
+      } else if (cleaned.startsWith('8801')) {
+        cleaned = '+' + cleaned;
+      }
+      return cleaned;
+    }),
   body('password').notEmpty().withMessage('Password is required'),
   handleValidationErrors,
 ];
@@ -41,7 +82,7 @@ export const register = async (req: Request, res: Response, next: NextFunction):
 
     const user = await prisma.$transaction(async (tx) => {
       const newUser = await tx.user.create({
-        data: { name, phone, email, passwordHash, role },
+        data: { name, phone, email: email || null, passwordHash, role },
         select: { id: true, name: true, phone: true, email: true, role: true, createdAt: true },
       });
 
@@ -52,6 +93,23 @@ export const register = async (req: Request, res: Response, next: NextFunction):
           balancePaisa: 0,
         },
       });
+
+      // If registered as driver, auto-provision their Tesla vehicle
+      if (role === 'DRIVER') {
+        const count = await tx.tesla.count();
+        const num = String(count + 1).padStart(3, '0');
+        await tx.tesla.create({
+          data: {
+            driverId: newUser.id,
+            name: `${name.split(' ')[0]}'s Tesla`,
+            licensePlate: `DHAKA-TESLA-${num}`,
+            capacity: 3,
+            status: TeslaStatus.OFFLINE,
+            currentLat: 23.7937,
+            currentLng: 90.4066,
+          },
+        });
+      }
 
       return newUser;
     });
