@@ -14,16 +14,18 @@ A ride-pooling MVP for Dhaka's battery-powered "Tesla" three-wheelers. Built aro
 
 ## 🚀 Live Demo
 
-> 🌐 [https://dhaka-tesla-pool.vercel.app](#) ← _After deployment_
+- **Frontend Application (Vercel):** [https://dhaka-tesla-pool-bd.vercel.app](https://dhaka-tesla-pool-bd.vercel.app)
+- **Backend API (Render):** [https://dhaka-tesla-pool-xf9v.onrender.com/api](https://dhaka-tesla-pool-xf9v.onrender.com/api)
+- **API Health Check:** [https://dhaka-tesla-pool-xf9v.onrender.com/health](https://dhaka-tesla-pool-xf9v.onrender.com/health)
 
 **Demo credentials** (all use password: `Tesla@2024`):
 
-| Role      | Name          | Phone            | Email                          |
-|-----------|---------------|------------------|--------------------------------|
-| 🚗 Driver  | Jashim Uddin  | +8801711000001   | jashim@dhakateslapool.com      |
-| 🧑 Passenger | Nusrat Jahan | +8801811000002   | nusrat@example.com             |
-| 🧑 Passenger | Rafiq Islam  | +8801911000003   | rafiq@example.com              |
-| 🧑 Passenger | Shirin Akter | +8801611000004   | shirin@example.com             |
+| Role      | Name          | Phone            | Email                          | Cast Note |
+|-----------|---------------|------------------|--------------------------------|-----------|
+| 🚗 Driver  | Jashim Uddin  | +8801711000001   | jashim@dhakateslapool.com      | Drives "Bullet" (3-seat electric Tesla) |
+| 🧑 Passenger | Nusrat Jahan | +8801811000002   | nusrat@example.com             | Banani → Mohakhali (pooled) |
+| 🧑 Passenger | Rafiq Islam  | +8801911000003   | rafiq@example.com              | Banani → Gulshan 1 (pooled) |
+| 🧑 Passenger | Shirin Akter | +8801611000004   | shirin@example.com             | Attempts 3rd pool seat |
 
 ---
 
@@ -71,7 +73,7 @@ graph LR
     API -->|Prisma ORM| DB[("🐘 PostgreSQL\n(Supabase / local)")]
     API -->|JWT| Auth["🔐 Auth\n(bcrypt + JWT)"]
 
-    subgraph Frontend["Frontend — Next.js 15 (App Router)"]
+    subgraph Frontend["Frontend — Next.js (App Router)"]
         Browser
         Zustand["🗄️ Zustand\n(client state)"]
     end
@@ -184,7 +186,7 @@ If another request won the race, this update matches 0 rows → we fall through 
 
 | Layer | Choice | Why | When to switch |
 |-------|--------|-----|----------------|
-| Frontend | Next.js 15 (App Router) | SSR, routing, TypeScript built-in | When needing more SPA-like feel → React + Vite |
+| Frontend | Next.js (App Router) | SSR, routing, TypeScript built-in | When needing more SPA-like feel → React + Vite |
 | Backend | Express + TypeScript | Simple, explicit, wide ecosystem | NestJS when team > 3 and needs DI framework |
 | Database | PostgreSQL | ACID transactions for capacity enforcement, relational pooling joins | Add read replicas at scale |
 | ORM | Prisma | Type-safe, excellent migrations, Prisma Studio | Raw SQL for complex geospatial queries |
@@ -422,32 +424,37 @@ graph TB
 
 ## 🤖 AI Usage
 
-This project was built with assistance from **Claude (Anthropic)** and **GitHub Copilot**.
+This project was built with assistance from **Google Antigravity (Antigravity IDE)**.
 
-**Tools used for:**
-- Initial architecture planning (structure, schema design decisions)
-- Boilerplate reduction (Express route setup, Prisma query patterns)
-- Test case brainstorming
+**Tools & Capabilities used for:**
+- Full-stack architectural scaffolding (Next.js App Router frontend, Express + TypeScript backend, Prisma ORM schema design)
+- Database schema modeling and ACID transaction isolation for concurrent seat booking
+- Test suite design for capacity constraints and edge-case state machine validation
+- Production deployment troubleshooting (CORS dynamic origin handling, Next.js build scripts on Vercel, Render backend containerization)
 
 **One accepted suggestion:**
-> Using `INTEGER paisa` instead of `DECIMAL BDT` for money storage. Claude suggested this as a best practice — avoids all floating-point precision issues in fare calculations. Adopted wholesale.
+> Using `INTEGER paisa` instead of `DECIMAL BDT` for money storage. Antigravity recommended this as a financial engineering best practice — completely eliminates IEEE 754 floating-point precision bugs in multi-passenger pooling discounts. Adopted wholesale.
 
 **One rejected/changed suggestion:**
-> Claude initially suggested using Prisma's `@default(autoincrement())` for IDs. Rejected in favor of `@default(cuid())` — CUIDs are more URL-safe and collision-resistant across distributed systems, better for external-facing IDs even at MVP stage.
+> Antigravity initially proposed using standard sequential autoincrement IDs for entity tables. Rejected in favor of `@default(cuid())` — CUIDs prevent enumeration attacks, are URL-safe, and avoid ID collisions across distributed microservices or replica nodes.
 
 ---
 
 ## 🛤️ Git Workflow
 
-Branches used:
-- `master` — stable, merged features
+Long-lived & release branches synchronized:
+- `main` / `master` — stable, production-ready release
+- `pre-release` — staging and pre-submission integration
+- `release/v1.0.0` — submitted milestone release
+- `backend` — backend service branch
+- `frontend` — frontend client branch
+
+Feature branches:
 - `feature/project-scaffold` — initial project structure
-- `feature/passenger-auth` — auth system
-- `feature/tesla-pooling` — pool matching + capacity
-- `feature/driver-flow` — driver dashboard + lifecycle
-- `feature/frontend-ui` — Next.js frontend
-- `pre-release` — integration fixes + docs
-- `release/v1.0.0` — submitted version
+- `feature/passenger-auth` — auth system & JWT
+- `feature/tesla-pooling` — pool matching + capacity logic
+- `feature/driver-flow` — driver dashboard + trip lifecycle
+- `feature/frontend-ui` — Next.js frontend user interface
 
 ---
 
