@@ -1,0 +1,264 @@
+// Dhaka Tesla Pool - Prisma Schema
+// Database: PostgreSQL
+// Money stored as INTEGER in paisa (1 BDT = 100 paisa) to avoid floating-point errors
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum UserRole {
+  PASSENGER
+  DRIVER
+}
+
+enum TeslaStatus {
+  OFFLINE
+  ONLINE
+  ON_TRIP
+}
+
+enum RideRequestStatus {
+  REQUESTED    // Passenger placed a request, waiting for match
+  MATCHED      // Matched to a pool / accepted by driver
+  DRIVER_ARRIVED // Driver reached pickup location
+  STARTED      // Trip in progress
+  COMPLETED    // Trip successfully completed
+  CANCELLED    // Cancelled by passenger or driver
+}
+
+enum PoolStatus {
+  OPEN         // Accepting more passengers (within capacity)
+  LOCKED       // Driver accepted; no more passengers
+  IN_PROGRESS  // Trip started
+  COMPLETED    // Trip done
+  CANCELLED    // Cancelled
+}
+
+enum PaymentMethod {
+  CASH
+  TESLA_PAY    // Simulated wallet
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+}
+
+// ─────────────────────────────────────────────
+// USERS (Passengers + Drivers share this table)
+// ─────────────────────────────────────────────
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  phone        String   @unique
+  email        String?  @unique
+  passwordHash String
+  role         UserRole
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  teslas        Tesla[]
+  rideRequests  RideRequest[]
+  wallet        Wallet?
+  auditLogs     AuditLog[]
+
+  @@index([phone])
+  @@index([role])
+}
+
+// ─────────────────────────────────────────────
+// WALLET (Simulated TeslaPay)
+// ─────────────────────────────────────────────
+model Wallet {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  balancePaisa Int   @default(0) // stored in paisa (integer)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions WalletTransaction[]
+}
+
+model WalletTransaction {
+  id          String   @id @default(cuid())
+  walletId    String
+  amountPaisa Int      // positive = credit, negative = debit
+  description String
+  createdAt   DateTime @default(now())
+
+  wallet      Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@index([walletId])
+}
+
+// ─────────────────────────────────────────────
+// LOCATIONS (predefined Dhaka areas)
+// ─────────────────────────────────────────────
+model Location {
+  id        String   @id @default(cuid())
+  name      String   @unique  // e.g. "Banani", "Gulshan 1"
+  zone      String            // e.g. "NORTH", "CENTRAL"
+  lat       Float
+  lng       Float
+  createdAt DateTime @default(now())
+
+  pickupRequests     RideRequest[] @relation("PickupLocation")
+  destinationRequests RideRequest[] @relation("DestinationLocation")
+}
+
+// ─────────────────────────────────────────────
+// TESLA (Vehicle owned by a driver)
+// ─────────────────────────────────────────────
+model Tesla {
+  id           String      @id @default(cuid())
+  driverId     String
+  name         String                          // e.g. "Bullet"
+  licensePlate String      @unique
+  capacity     Int                             // total seats (e.g. 3)
+  status       TeslaStatus @default(OFFLINE)
+  currentLat   Float?
+  currentLng   Float?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  driver       User        @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  pools        Pool[]
+
+  @@index([driverId])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────
+// POOL (Groups multiple RideRequests into one Tesla trip)
+// A Pool represents one Tesla trip that may carry 1-N passengers
+// ─────────────────────────────────────────────
+model Pool {
+  id               String     @id @default(cuid())
+  teslaId          String
+  status           PoolStatus @default(OPEN)
+  seatsOccupied    Int        @default(0)  // enforced <= tesla.capacity
+  pickupZone       String                  // zone for matching (e.g. "NORTH")
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  startedAt        DateTime?
+  completedAt      DateTime?
+
+  tesla            Tesla      @relation(fields: [teslaId], references: [id])
+  rideRequests     RideRequest[]
+
+  @@index([teslaId])
+  @@index([status])
+  @@index([pickupZone, status])  // for matching queries
+}
+
+// ─────────────────────────────────────────────
+// RIDE REQUEST (One per passenger per trip request)
+// ─────────────────────────────────────────────
+model RideRequest {
+  id               String            @id @default(cuid())
+  passengerId      String
+  poolId           String?
+  pickupLocationId String
+  destLocationId   String
+  seatsRequested   Int               @default(1)
+  status           RideRequestStatus @default(REQUESTED)
+
+  // Fare breakdown (all in paisa)
+  baseFarePaisa       Int?
+  distanceChargePaisa Int?
+  poolDiscountPaisa   Int?
+  totalFarePaisa      Int?           // = baseFare + distanceCharge - poolDiscount
+
+  paymentMethod    PaymentMethod     @default(CASH)
+  paymentStatus    PaymentStatus     @default(PENDING)
+
+  notes            String?           // passenger notes
+  cancellationReason String?
+
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  matchedAt        DateTime?
+  arrivedAt        DateTime?
+  startedAt        DateTime?
+  completedAt      DateTime?
+  cancelledAt      DateTime?
+
+  passenger        User              @relation(fields: [passengerId], references: [id])
+  pool             Pool?             @relation(fields: [poolId], references: [id])
+  pickupLocation   Location          @relation("PickupLocation", fields: [pickupLocationId], references: [id])
+  destLocation     Location          @relation("DestinationLocation", fields: [destLocationId], references: [id])
+  statusHistory    RideStatusHistory[]
+  payment          Payment?
+
+  @@index([passengerId])
+  @@index([poolId])
+  @@index([status])
+  @@index([pickupLocationId])
+}
+
+// ─────────────────────────────────────────────
+// RIDE STATUS HISTORY (Audit trail for each request)
+// ─────────────────────────────────────────────
+model RideStatusHistory {
+  id             String            @id @default(cuid())
+  rideRequestId  String
+  fromStatus     RideRequestStatus?
+  toStatus       RideRequestStatus
+  changedBy      String            // userId who triggered the change
+  reason         String?
+  createdAt      DateTime          @default(now())
+
+  rideRequest    RideRequest       @relation(fields: [rideRequestId], references: [id], onDelete: Cascade)
+
+  @@index([rideRequestId])
+}
+
+// ─────────────────────────────────────────────
+// PAYMENT (One per RideRequest)
+// ─────────────────────────────────────────────
+model Payment {
+  id              String        @id @default(cuid())
+  rideRequestId   String        @unique
+  amountPaisa     Int
+  method          PaymentMethod
+  status          PaymentStatus @default(PENDING)
+  transactionRef  String?       // for TeslaPay
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  rideRequest     RideRequest   @relation(fields: [rideRequestId], references: [id])
+
+  @@index([rideRequestId])
+}
+
+// ─────────────────────────────────────────────
+// AUDIT LOG (System-wide events for debugging)
+// ─────────────────────────────────────────────
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
