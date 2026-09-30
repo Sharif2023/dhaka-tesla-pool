@@ -36,7 +36,7 @@ function RideCard({ ride, onCancel }: { ride: RideRequest; onCancel: (id: string
             <span
               style={{
                 width: '8px', height: '8px', borderRadius: '50%',
-                background: STATUS_COLORS[ride.status] || '#64748b',
+                background: STATUS_COLORS[ride.status] || 'var(--color-muted)',
                 display: 'inline-block',
                 ...(isActive ? { animation: 'pulse-glow 2s infinite' } : {}),
               }}
@@ -45,7 +45,7 @@ function RideCard({ ride, onCancel }: { ride: RideRequest; onCancel: (id: string
               {STATUS_LABELS[ride.status] || ride.status}
             </span>
           </div>
-          <div style={{ fontSize: '12px', color: '#64748b' }}>
+          <div style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
             {new Date(ride.createdAt).toLocaleDateString('en-BD', { dateStyle: 'medium' })} at{' '}
             {new Date(ride.createdAt).toLocaleTimeString('en-BD', { timeStyle: 'short' })}
           </div>
@@ -177,11 +177,11 @@ export default function PassengerDashboard() {
           <h1 style={{ fontSize: '28px', fontWeight: 800 }}>
             Good day, {user?.name?.split(' ')[0]}!
           </h1>
-          <p style={{ color: '#64748b', marginTop: '4px' }}>Ready to pool a ride through Dhaka?</p>
+          <p style={{ color: 'var(--color-muted)', marginTop: '4px' }}>Ready to pool a ride through Dhaka?</p>
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '60px', color: '#64748b' }}>
+          <div style={{ textAlign: 'center', padding: '60px', color: 'var(--color-muted)' }}>
             <span className="spinner" style={{ width: '32px', height: '32px', borderWidth: '3px' }} />
             <p style={{ marginTop: '16px' }}>Loading your rides...</p>
           </div>
@@ -190,7 +190,7 @@ export default function PassengerDashboard() {
             {/* Active Ride */}
             {activeRide ? (
               <div style={{ marginBottom: '32px' }}>
-                <h2 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '12px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <h2 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '12px', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   Active Ride
                 </h2>
                 <RideCard ride={activeRide} onCancel={handleCancel} />
@@ -200,7 +200,7 @@ export default function PassengerDashboard() {
                 <div className="glass" style={{ padding: '32px', textAlign: 'center' }}>
                   <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}><Zap size={48} color="var(--color-text)" /></div>
                   <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>No active ride</h2>
-                  <p style={{ color: '#64748b', marginBottom: '20px' }}>Book a Tesla pool ride through Dhaka</p>
+                  <p style={{ color: 'var(--color-muted)', marginBottom: '20px' }}>Book a Tesla pool ride through Dhaka</p>
                   <Link href="/passenger/book">
                     <button className="btn btn-primary btn-lg">
                       <Zap size={16} />
@@ -215,7 +215,7 @@ export default function PassengerDashboard() {
             {recentRides.length > 0 && (
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Recent Rides
                   </h2>
                   <Link href="/passenger/rides" style={{ fontSize: '13px', color: 'var(--color-text)', textDecoration: 'none' }}>
