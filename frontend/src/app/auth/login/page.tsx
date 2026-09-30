@@ -42,6 +42,7 @@ export default function LoginPage() {
       padding: '20px',
     }}>
       <div style={{ width: '100%', maxWidth: '420px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
             <Zap size={40} color="var(--color-text)" />
           </div>
