@@ -3,7 +3,13 @@
  * Centralized API calls to the backend
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+const getApiBase = () => {
+  const raw = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api').trim();
+  const stripped = raw.replace(/\/+$/, '');
+  return stripped.endsWith('/api') ? stripped : `${stripped}/api`;
+};
+
+const API_BASE = getApiBase();
 
 class ApiError extends Error {
   constructor(public status: number, message: string) {
