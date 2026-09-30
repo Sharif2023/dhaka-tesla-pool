@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/authStore';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 import SidebarLayout from '@/components/SidebarLayout';
 import { driverApi, type DriverDashboard, type Pool, type RideRequest } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -101,26 +101,26 @@ function PoolCard({ pool, onAction, onAccept }: {
 }
 
 export default function DriverDashboard() {
-  const { user } = useAuthStore();
-  const router = useRouter();
+  const { user, isReady } = useAuthGuard('DRIVER');
   const [dashboard, setDashboard] = useState<DriverDashboard | null>(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!user) { router.push('/auth/login'); return; }
-    if (user.role !== 'DRIVER') { router.push('/passenger'); return; }
-    loadDashboard();
-    const interval = setInterval(loadDashboard, 8000);
-    return () => clearInterval(interval);
-  }, [user]);
 
   const loadDashboard = useCallback(async () => {
     try {
       const res = await driverApi.getRequests();
       setDashboard(res.data);
       setLoading(false);
-    } catch { setLoading(false); }
+    } catch {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    if (!isReady) return;
+    loadDashboard();
+    const interval = setInterval(loadDashboard, 8000);
+    return () => clearInterval(interval);
+  }, [isReady, loadDashboard]);
 
   const toggleStatus = async () => {
     if (!dashboard) return;
@@ -173,9 +173,17 @@ export default function DriverDashboard() {
   const activePools = dashboard?.activePools || [];
   const isOnline = tesla?.status === 'ONLINE' || tesla?.status === 'ON_TRIP';
 
+  if (!isReady) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg)' }}>
+        <span className="spinner" style={{ width: '32px', height: '32px', borderWidth: '3px' }} />
+      </div>
+    );
+  }
+
   return (
     <SidebarLayout navItems={navItems} role="DRIVER">
-      <div style={{ maxWidth: '880px', width: '100%' }}>
+      <div style={{ maxWidth: '1100px', width: '100%' }}>
         {/* Header */}
         <div style={{
           display: 'flex',

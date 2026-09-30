@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/authStore';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 import SidebarLayout from '@/components/SidebarLayout';
 import { rideApi, RideRequest } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -19,16 +19,16 @@ const STATUS_BADGE: Record<string, string> = {
 };
 
 export default function MyRidesPage() {
-  const { user } = useAuthStore();
+  const { user, isReady } = useAuthGuard('PASSENGER');
   const router = useRouter();
   const [rides, setRides] = useState<RideRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
 
   useEffect(() => {
-    if (!user || user.role !== 'PASSENGER') { router.push('/auth/login'); return; }
+    if (!isReady) return;
     loadRides();
-  }, [user, filter]);
+  }, [isReady, filter]);
 
   const loadRides = async () => {
     setLoading(true);
@@ -53,9 +53,17 @@ export default function MyRidesPage() {
     { href: '/passenger/rides', label: 'My Rides', icon: <Clock size={16} /> },
   ];
 
+  if (!isReady) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg)' }}>
+        <span className="spinner" style={{ width: '32px', height: '32px', borderWidth: '3px' }} />
+      </div>
+    );
+  }
+
   return (
     <SidebarLayout navItems={navItems} role="PASSENGER">
-      <div style={{ maxWidth: '800px' }}>
+      <div style={{ maxWidth: '1100px', width: '100%' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <h1 style={{ fontSize: '28px', fontWeight: 800 }}>My Rides</h1>
