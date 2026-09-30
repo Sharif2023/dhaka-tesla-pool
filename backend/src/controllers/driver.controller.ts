@@ -191,8 +191,25 @@ export const updatePoolStatus = async (req: AuthenticatedRequest, res: Response,
     if (pool.teslaId !== tesla.id) throw new ForbiddenError('This pool is not assigned to your Tesla');
 
     // Validate that all rides can transition
-    const eligibleRides = pool.rideRequests.filter(r => r.status === transition.from);
+    const isEligibleForTransition = (status: RideRequestStatus) => {
+      if (action === 'arrive') {
+        return status === RideRequestStatus.MATCHED || status === RideRequestStatus.REQUESTED;
+      }
+      return status === transition.from;
+    };
+
+    const eligibleRides = pool.rideRequests.filter(r => isEligibleForTransition(r.status));
     if (eligibleRides.length === 0) {
+      // Idempotency: if all active rides are already in the target status, succeed gracefully
+      const alreadyInTarget = pool.rideRequests.length > 0 && pool.rideRequests.every(r => r.status === transition.to);
+      if (alreadyInTarget) {
+        res.json({
+          success: true,
+          message: `Rides are already in status ${transition.to}`,
+          data: { poolId, action, newRideStatus: transition.to },
+        });
+        return;
+      }
       throw new AppError(`No rides in status ${transition.from} to transition`, 409);
     }
 
@@ -201,7 +218,12 @@ export const updatePoolStatus = async (req: AuthenticatedRequest, res: Response,
     await prisma.$transaction(async (tx) => {
       // Transition all eligible rides
       await tx.rideRequest.updateMany({
-        where: { poolId, status: transition.from },
+        where: {
+          poolId,
+          status: action === 'arrive'
+            ? { in: [RideRequestStatus.MATCHED, RideRequestStatus.REQUESTED] }
+            : transition.from,
+        },
         data: {
           status: transition.to,
           ...(transition.to === RideRequestStatus.MATCHED && { matchedAt: now }),
@@ -215,7 +237,7 @@ export const updatePoolStatus = async (req: AuthenticatedRequest, res: Response,
       await tx.rideStatusHistory.createMany({
         data: eligibleRides.map(r => ({
           rideRequestId: r.id,
-          fromStatus: transition.from,
+          fromStatus: r.status,
           toStatus: transition.to,
           changedBy: driverId,
         })),

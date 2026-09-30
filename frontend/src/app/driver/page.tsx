@@ -10,18 +10,56 @@ import { Power, Users, ArrowRight, Clock, History, CheckCircle, Car, Zap, MapPin
 
 type DriverAction = 'arrive' | 'start' | 'complete';
 
-const ACTION_CONFIG: Record<string, { label: string; action: DriverAction; color: string; next: string }> = {
-  LOCKED:      { label: 'Mark Arrived', action: 'arrive',   color: 'var(--color-text)', next: 'DRIVER_ARRIVED' },
-  DRIVER_ARRIVED: { label: 'Start Trip',  action: 'start',    color: 'var(--color-text)', next: 'STARTED' },
-  IN_PROGRESS:    { label: 'Complete Trip', action: 'complete', color: 'var(--color-success)', next: 'COMPLETED' },
-};
+function getPoolActionConfig(pool: Pool): { label: string; action: DriverAction; color: string } | null {
+  if (pool.status === 'OPEN' || pool.status === 'COMPLETED' || pool.status === 'CANCELLED') {
+    return null;
+  }
+
+  const riders = pool.rideRequests?.filter(r => r.status !== 'CANCELLED') || [];
+
+  // If pool is in progress or any ride is already started: complete trip
+  if (pool.status === 'IN_PROGRESS' || riders.some(r => r.status === 'STARTED')) {
+    return { label: 'Complete Trip', action: 'complete', color: 'var(--color-success)' };
+  }
+
+  // If all active rides have arrived: start trip
+  if (riders.length > 0 && riders.every(r => r.status === 'DRIVER_ARRIVED')) {
+    return { label: 'Start Trip', action: 'start', color: 'var(--color-text)' };
+  }
+
+  // If rides are matched or pool is locked: mark arrived
+  if (riders.some(r => r.status === 'MATCHED' || r.status === 'REQUESTED') || pool.status === 'LOCKED') {
+    return { label: 'Mark Arrived', action: 'arrive', color: 'var(--color-text)' };
+  }
+
+  return null;
+}
+
+function getPoolBadge(pool: Pool): { label: string; className: string } {
+  const riders = pool.rideRequests?.filter(r => r.status !== 'CANCELLED') || [];
+
+  if (pool.status === 'OPEN') {
+    return { label: 'OPEN', className: 'badge-requested' };
+  }
+  if (pool.status === 'IN_PROGRESS' || riders.some(r => r.status === 'STARTED')) {
+    return { label: 'IN PROGRESS', className: 'badge-started' };
+  }
+  if (pool.status === 'COMPLETED') {
+    return { label: 'COMPLETED', className: 'badge-completed' };
+  }
+  if (riders.length > 0 && riders.every(r => r.status === 'DRIVER_ARRIVED')) {
+    return { label: 'ARRIVED', className: 'badge-arrived' };
+  }
+  return { label: 'MATCHED', className: 'badge-matched' };
+}
 
 function PoolCard({ pool, onAction, onAccept }: {
   pool: Pool;
   onAction: (poolId: string, action: DriverAction) => void;
   onAccept: (poolId: string) => void;
 }) {
-  const actionConfig = ACTION_CONFIG[pool.status];
+  const actionConfig = getPoolActionConfig(pool);
+  const badgeInfo = getPoolBadge(pool);
   const riders = pool.rideRequests?.filter(r => r.status !== 'CANCELLED') || [];
 
   return (
@@ -36,8 +74,8 @@ function PoolCard({ pool, onAction, onAccept }: {
             {riders.length} passenger{riders.length !== 1 ? 's' : ''} • {pool.seatsOccupied} seats
           </div>
         </div>
-        <span className={`badge badge-${pool.status === 'OPEN' ? 'requested' : pool.status === 'LOCKED' ? 'matched' : pool.status === 'IN_PROGRESS' ? 'started' : 'completed'}`}>
-          {pool.status}
+        <span className={`badge ${badgeInfo.className}`}>
+          {badgeInfo.label}
         </span>
       </div>
 
