@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/authStore';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 import SidebarLayout from '@/components/SidebarLayout';
 import { locationApi, rideApi, Location, FareEstimate } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Zap, Clock, MapPin, ArrowRight, Loader, Home, Wallet, Banknote, Sparkles } from 'lucide-react';
 
 export default function BookRidePage() {
-  const { user } = useAuthStore();
+  const { user, isReady } = useAuthGuard('PASSENGER');
   const router = useRouter();
   const [locations, setLocations] = useState<Location[]>([]);
   const [form, setForm] = useState({ pickupId: '', destId: '', seats: 1, payment: 'CASH', notes: '' });
@@ -19,9 +19,9 @@ export default function BookRidePage() {
   const [booked, setBooked] = useState(false);
 
   useEffect(() => {
-    if (!user || user.role !== 'PASSENGER') { router.push('/auth/login'); return; }
+    if (!isReady) return;
     locationApi.getAll().then(res => setLocations(res.data.locations));
-  }, [user]);
+  }, [isReady]);
 
   useEffect(() => {
     if (form.pickupId && form.destId && form.pickupId !== form.destId) {
@@ -73,6 +73,14 @@ export default function BookRidePage() {
     return acc;
   }, {});
 
+  if (!isReady) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg)' }}>
+        <span className="spinner" style={{ width: '32px', height: '32px', borderWidth: '3px' }} />
+      </div>
+    );
+  }
+
   if (booked) {
     return (
       <SidebarLayout navItems={navItems} role="PASSENGER">
@@ -88,7 +96,7 @@ export default function BookRidePage() {
 
   return (
     <SidebarLayout navItems={navItems} role="PASSENGER">
-      <div style={{ maxWidth: '680px' }}>
+      <div style={{ maxWidth: '820px', width: '100%' }}>
         <div style={{ marginBottom: '24px' }}>
           <h1 style={{ fontSize: '28px', fontWeight: 800 }}>Book a Ride</h1>
           <p style={{ color: 'var(--color-muted)', marginTop: '4px' }}>Get matched with a Tesla pool or ride solo</p>

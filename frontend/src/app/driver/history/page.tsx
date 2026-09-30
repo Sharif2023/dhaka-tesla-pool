@@ -2,23 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/authStore';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 import SidebarLayout from '@/components/SidebarLayout';
 import { driverApi, Pool } from '@/lib/api';
 import { Car, History, ArrowRight, Users, Wallet, FolderOpen } from 'lucide-react';
 
 export default function DriverHistoryPage() {
-  const { user } = useAuthStore();
-  const router = useRouter();
+  const { user, isReady } = useAuthGuard('DRIVER');
   const [pools, setPools] = useState<Pool[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user || user.role !== 'DRIVER') { router.push('/auth/login'); return; }
+    if (!isReady) return;
     driverApi.getHistory()
       .then(res => { setPools(res.data.pools); setLoading(false); })
       .catch(() => setLoading(false));
-  }, [user]);
+  }, [isReady]);
 
   const navItems = [
     { href: '/driver', label: 'Dashboard', icon: <Car size={16} /> },
@@ -28,12 +27,48 @@ export default function DriverHistoryPage() {
   const totalEarnings = pools.reduce((sum, p) =>
     sum + (p.rideRequests?.reduce((s, r) => s + (r.totalFarePaisa || 0), 0) || 0), 0);
 
+  if (!isReady) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg)' }}>
+        <span className="spinner" style={{ width: '32px', height: '32px', borderWidth: '3px' }} />
+      </div>
+    );
+  }
+
   return (
     <SidebarLayout navItems={navItems} role="DRIVER">
-      <div style={{ maxWidth: '800px' }}>
-        <div style={{ marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '28px', fontWeight: 800 }}>Trip History</h1>
-          <p style={{ color: 'var(--color-muted)', marginTop: '4px' }}>{pools.length} completed trips</p>
+      <div style={{ maxWidth: '1100px', width: '100%' }}>
+        {/* Header */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '28px',
+          paddingBottom: '20px',
+          borderBottom: '1px solid var(--color-border)',
+          flexWrap: 'wrap',
+          gap: '16px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{
+              width: '44px', height: '44px',
+              borderRadius: '12px',
+              background: 'var(--color-surface2)',
+              border: '1px solid var(--color-border)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <History size={22} color="var(--color-text)" />
+            </div>
+            <div>
+              <h1 style={{ fontSize: '26px', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
+                Trip History
+              </h1>
+              <p style={{ color: 'var(--color-muted)', fontSize: '13px', marginTop: '3px', margin: 0 }}>
+                {pools.length} completed trips • Banani Zone
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Stats */}

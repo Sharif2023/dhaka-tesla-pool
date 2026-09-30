@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
@@ -13,6 +13,18 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const { login, isLoading } = useAuthStore();
   const router = useRouter();
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('dhaka-tesla-pool-auth');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.state?.user?.role) {
+          router.replace(parsed.state.user.role === 'DRIVER' ? '/driver' : '/passenger');
+        }
+      }
+    } catch {}
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/authStore';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
 import SidebarLayout from '@/components/SidebarLayout';
 import { driverApi, type DriverDashboard, type Pool, type RideRequest } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -101,26 +101,26 @@ function PoolCard({ pool, onAction, onAccept }: {
 }
 
 export default function DriverDashboard() {
-  const { user } = useAuthStore();
-  const router = useRouter();
+  const { user, isReady } = useAuthGuard('DRIVER');
   const [dashboard, setDashboard] = useState<DriverDashboard | null>(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!user) { router.push('/auth/login'); return; }
-    if (user.role !== 'DRIVER') { router.push('/passenger'); return; }
-    loadDashboard();
-    const interval = setInterval(loadDashboard, 8000);
-    return () => clearInterval(interval);
-  }, [user]);
 
   const loadDashboard = useCallback(async () => {
     try {
       const res = await driverApi.getRequests();
       setDashboard(res.data);
       setLoading(false);
-    } catch { setLoading(false); }
+    } catch {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    if (!isReady) return;
+    loadDashboard();
+    const interval = setInterval(loadDashboard, 8000);
+    return () => clearInterval(interval);
+  }, [isReady, loadDashboard]);
 
   const toggleStatus = async () => {
     if (!dashboard) return;
@@ -173,17 +173,69 @@ export default function DriverDashboard() {
   const activePools = dashboard?.activePools || [];
   const isOnline = tesla?.status === 'ONLINE' || tesla?.status === 'ON_TRIP';
 
+  if (!isReady) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg)' }}>
+        <span className="spinner" style={{ width: '32px', height: '32px', borderWidth: '3px' }} />
+      </div>
+    );
+  }
+
   return (
     <SidebarLayout navItems={navItems} role="DRIVER">
-      <div style={{ maxWidth: '800px' }}>
+      <div style={{ maxWidth: '1100px', width: '100%' }}>
         {/* Header */}
-        <div style={{ marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '28px', fontWeight: 800 }}>
-            Driver Dashboard
-          </h1>
-          <p style={{ color: 'var(--color-muted)', marginTop: '4px' }}>
-            Welcome, {user?.name?.split(' ')[0]}!
-          </p>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '28px',
+          paddingBottom: '20px',
+          borderBottom: '1px solid var(--color-border)',
+          flexWrap: 'wrap',
+          gap: '16px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{
+              width: '44px', height: '44px',
+              borderRadius: '12px',
+              background: 'var(--color-surface2)',
+              border: '1px solid var(--color-border)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <Car size={22} color="var(--color-text)" />
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <h1 style={{ fontSize: '26px', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
+                  Driver Dashboard
+                </h1>
+                <span className="badge" style={{
+                  fontSize: '11px',
+                  padding: '2px 8px',
+                  background: isOnline ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.08)',
+                  color: isOnline ? 'var(--color-success)' : 'var(--color-muted)',
+                  border: `1px solid ${isOnline ? 'rgba(16, 185, 129, 0.3)' : 'var(--color-border)'}`,
+                }}>
+                  {isOnline ? '● ONLINE' : '○ OFFLINE'}
+                </span>
+              </div>
+              <p style={{ color: 'var(--color-muted)', fontSize: '13px', marginTop: '3px', margin: 0 }}>
+                Welcome, {user?.name || 'Driver'} • Banani Zone
+              </p>
+            </div>
+          </div>
+
+          <button
+            className={`btn ${isOnline ? 'btn-danger' : 'btn-success'}`}
+            onClick={toggleStatus}
+            disabled={tesla?.status === 'ON_TRIP'}
+            style={{ gap: '8px', padding: '10px 18px', borderRadius: '10px' }}
+          >
+            <Power size={16} />
+            {tesla?.status === 'ON_TRIP' ? 'On Trip' : isOnline ? 'Go Offline' : 'Go Online'}
+          </button>
         </div>
 
         {loading ? (
@@ -195,40 +247,45 @@ export default function DriverDashboard() {
             {/* Tesla status card */}
             {tesla && (
               <div className="card" style={{ marginBottom: '24px', border: `1px solid ${isOnline ? 'rgba(16, 185, 129, 0.3)' : 'var(--color-border)'}` }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                      <div style={{
-                        width: '48px', height: '48px',
-                        background: 'var(--color-surface2)',
-                        border: '1px solid var(--color-border)',
-                        borderRadius: '12px',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '24px',
-                      }}><Zap size={24} color="var(--color-text)" /></div>
-                      <div>
-                        <div style={{ fontWeight: 800, fontSize: '20px' }}>{tesla.name}</div>
-                        <div style={{ fontSize: '13px', color: 'var(--color-muted)' }}>{tesla.licensePlate}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <div style={{
+                      width: '44px', height: '44px',
+                      background: 'var(--color-surface2)',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: '12px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <Zap size={22} color="var(--color-text)" />
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {tesla.name}
+                        <span style={{ fontSize: '12px', color: 'var(--color-muted)', fontWeight: 500, fontFamily: 'monospace' }}>
+                          {tesla.licensePlate}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '12px', color: 'var(--color-muted)', marginTop: '2px' }}>
+                        Battery-powered 3-seater • Unaffiliated Tesla
                       </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span className={`badge`} style={{ padding: '4px 8px', background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--color-muted)' }}>Seats</div>
+                      <div style={{ fontWeight: 700, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
+                        <Users size={13} /> {tesla.capacity} seats
+                      </div>
+                    </div>
+                    <div style={{ width: '1px', height: '28px', background: 'var(--color-border)' }} />
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--color-muted)' }}>Vehicle Status</div>
+                      <div style={{ fontWeight: 700, fontSize: '14px', color: isOnline ? 'var(--color-success)' : 'var(--color-muted)' }}>
                         {tesla.status}
-                      </span>
-                      <span style={{ fontSize: '13px', color: 'var(--color-muted)' }}>
-                        <Users size={12} style={{ display: 'inline' }} /> {tesla.capacity} seats
-                      </span>
+                      </div>
                     </div>
                   </div>
-                  <button
-                    className={`btn ${isOnline ? 'btn-danger' : 'btn-success'}`}
-                    onClick={toggleStatus}
-                    disabled={tesla.status === 'ON_TRIP'}
-                    style={{ gap: '8px' }}
-                  >
-                    <Power size={16} />
-                    {tesla.status === 'ON_TRIP' ? 'On Trip' : isOnline ? 'Go Offline' : 'Go Online'}
-                  </button>
                 </div>
               </div>
             )}
